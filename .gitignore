@@ -21,5 +21,7 @@ vendor/
 go.work
 go.work.sum
 
+src/**/pgorm/**
+
 # env file
 .env
