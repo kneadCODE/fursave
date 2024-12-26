@@ -1,5 +1,7 @@
 services:
-  pg:
+
+  # ledgersvc
+  ledgersvc-pg:
     image: postgres:17-alpine
     restart: always
     healthcheck:
@@ -12,37 +14,38 @@ services:
     ports:
       - "5433:5432"
     env_file:
-      - path: ./.env
-  pg-migrate:
+      - path: ./.ledgersvc.env
+  ledgersvc-pg-migrate:
     image: migrate/migrate:v4.18.1
     entrypoint: "" # Overriding in order to write command in Makefile
     networks:
       - net
     env_file:
-      - path: ./.env
+      - path: ./.ledgersvc.env
     volumes:
-      - ../data/pg/migrations:/migrations
+      - ../src/ledgersvc/db-scripts/pg/migrations:/migrations
     depends_on:
-      pg:
+      ledgersvc-pg:
         condition: service_healthy
         restart: true
-  go:
+  ledgersvc-go:
     image: golang:1.23-alpine
     networks:
       - net
     ports:
       - "4000:4000"
     env_file:
-      - path: ./.env
+      - path: ./.ledgersvc.env
     volumes:
-      - ../backend:/backend:cached
-      - backend-build-cache:/root/.cache/go-build
-    working_dir: /backend
+      - ../src/ledgersvc:/src:cached
+      - ledgersvc-build-cache:/root/.cache/go-build
+    working_dir: /src
     depends_on:
-      pg:
+      ledgersvc-pg:
         condition: service_healthy
         restart: true
+
 networks:
   net:
 volumes:
-  backend-build-cache:
+  ledgersvc-build-cache:
