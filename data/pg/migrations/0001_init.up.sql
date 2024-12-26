@@ -1,0 +1,12 @@
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.ledgers (
+    id BIGINT PRIMARY KEY CHECK (id != 0),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    name VARCHAR(35) NOT NULL CHECK (name != '')
+);
+
+COMMIT;
+
