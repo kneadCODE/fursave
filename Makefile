@@ -1,5 +1,5 @@
 teardown:
-	${COMPOSE} down
+	${COMPOSE} down --rmi local
 
 golib-test:
 	${COMPOSE} run --rm golib-go sh -c 'go test -coverprofile=c.out -failfast -timeout 5m ./...'
@@ -11,9 +11,11 @@ ledgersvc-pg-migrate:
 ledgersvc-pg-migrate-down:
 	${COMPOSE} run --rm ledgersvc-pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL down'
 ledgersvc-pg-migrate-redo: ledgersvc-pg-migrate-down ledgersvc-pg-migrate
-ledgersvc-setup: ledgersvc-pg ledgersvc-pg-migrate ledgersvc-go-vendor
 ledgersvc-go-vendor:
 	${COMPOSE} run --rm ledgersvc-go sh -c 'go mod tidy && go mod vendor'
+ledgersvc-go-gen:
+	${COMPOSE} run --rm ledgersvc-go sh -c 'go generate ./...'
+ledgersvc-setup: ledgersvc-pg ledgersvc-pg-migrate ledgersvc-go-vendor ledgersvc-go-gen
 ledgersvc-test:
 	${COMPOSE} run --rm ledgersvc-go sh -c 'go test -coverprofile=c.out -failfast -timeout 5m ./...'
 ledgersvc-serverd:

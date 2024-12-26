@@ -37,7 +37,9 @@ services:
         condition: service_healthy
         restart: true
   ledgersvc-go:
-    image: golang:1.23-alpine
+    build:
+      context: .
+      dockerfile: ./.ledgersvc.Dockerfile
     networks:
       - net
     ports:

@@ -1,0 +1,34 @@
+# Refer to https://github.com/volatiletech/sqlboiler#configuration
+pkgname: pgorm
+output: ./internal/repository/pgorm
+no-hooks: true
+no-tests: true # Because the generated tests runs `dropdb` which will be troublesome in local where we want to retain data
+add-soft-deletes: true
+strict-verify-mod-version: true
+psql:
+  host: ledgersvc-pg
+  dbname: pg
+  port: 5432
+  user: pg
+  pass: trustmebro
+  sslmode: disable
+  schema: public
+  blacklist:
+    - schema_migrations
+types:
+  - match:
+      type: types.Decimal
+      nullable: false
+    replace:
+      type: decimal.Decimal
+    imports:
+      third_party:
+        - '"github.com/shopspring/decimal"'
+  - match:
+      type: types.NullDecimal
+      nullable: true
+    replace:
+      type: decimal.NullDecimal
+    imports:
+      third_party:
+        - '"github.com/shopspring/decimal"'
