@@ -1,5 +1,5 @@
 BEGIN;
 
-DROP TABLE IF EXISTS public.ledgers;
+DROP TABLE IF EXISTS public.ledgers CASCADE;
 
 COMMIT;
