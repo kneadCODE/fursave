@@ -16,6 +16,11 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BASE }}
+        with:
+          args:
+            -Dsonar.projectKey=fursave_base
+            -Dsonar.organization=kneadcode
+            -Dsonar.exclusions=src/
   scan-golib:
     name: scan-golib
     runs-on: ubuntu-latest
@@ -29,6 +34,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_GOLIB }}
         with:
           projectBaseDir: src/golib/
+          args:
+            -Dsonar.projectKey=fursave_golib
+            -Dsonar.organization=kneadcode
   scan-ledgersvc:
     name: scan-ledgersvc
     runs-on: ubuntu-latest
@@ -42,3 +50,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_LEDGERSVC }}
         with:
           projectBaseDir: src/ledgersvc/
+          args:
+            -Dsonar.projectKey=fursave_ledgersvc
+            -Dsonar.organization=kneadcode
