@@ -48,6 +48,7 @@ services:
       - path: ./.ledgersvc.env
     volumes:
       - ../src/ledgersvc:/src:cached
+      - ../src/golib:/golib:cached
       - ledgersvc-build-cache:/root/.cache/go-build
     working_dir: /src
     depends_on:

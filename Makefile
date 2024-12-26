@@ -1,6 +1,9 @@
 teardown:
 	${COMPOSE} down --rmi local
 
+golib-go-vendor:
+	${COMPOSE} run --rm golib-go sh -c 'go mod tidy && go mod vendor'
+golib-setup: golib-go-vendor
 golib-test:
 	${COMPOSE} run --rm golib-go sh -c 'go test -coverprofile=c.out -failfast -timeout 5m ./...'
 

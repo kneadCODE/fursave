@@ -12,8 +12,10 @@ jobs:
       fail-fast: true
     steps:
       - uses: actions/checkout@v4
+      - name: setup
+        run: make golib-setup
       - name: run-tests
-        run: make ledgersvc-test
+        run: make golib-test
   test-ledgersvc:
     name: test-ledgersvc
     runs-on: ubuntu-latest
