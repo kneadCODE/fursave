@@ -1,0 +1,48 @@
+services:
+  pg:
+    image: postgres:17-alpine
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    networks:
+      - net
+    ports:
+      - "5433:5432"
+    env_file:
+      - path: ./.env
+  pg-migrate:
+    image: migrate/migrate:v4.18.1
+    entrypoint: "" # Overriding in order to write command in Makefile
+    networks:
+      - net
+    env_file:
+      - path: ./.env
+    volumes:
+      - ../data/pg/migrations:/migrations
+    depends_on:
+      pg:
+        condition: service_healthy
+        restart: true
+  go:
+    image: golang:1.23-alpine
+    networks:
+      - net
+    ports:
+      - "4000:4000"
+    env_file:
+      - path: ./.env
+    volumes:
+      - ../backend:/backend:cached
+      - backend-build-cache:/root/.cache/go-build
+    working_dir: /backend
+    depends_on:
+      pg:
+        condition: service_healthy
+        restart: true
+networks:
+  net:
+volumes:
+  backend-build-cache:
