@@ -1,0 +1,27 @@
+name: "CI"
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  test-golib:
+    name: test-golib
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: run-tests
+        run: make ledgersvc-test
+  test-ledgersvc:
+    name: test-ledgersvc
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup
+        run: make ledgersvc-setup
+      - name: run-tests
+        run: make ledgersvc-test
