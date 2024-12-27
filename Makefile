@@ -7,7 +7,7 @@ golib-go-clean-vendor:
 	${COMPOSE} run --rm golib-go sh -c 'go mod tidy && go mod vendor'
 golib-setup: golib-go-vendor
 golib-test:
-	${COMPOSE} run --rm golib-go sh -c 'go test -coverprofile=c.out -failfast -timeout 5m ./...'
+	${COMPOSE} run --rm golib-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./... -json > coverage.json'
 
 ledgersvc-pg:
 	${COMPOSE} up -d ledgersvc-pg
@@ -24,7 +24,7 @@ ledgersvc-go-gen:
 	${COMPOSE} run --rm ledgersvc-go sh -c 'go generate ./...'
 ledgersvc-setup: ledgersvc-pg ledgersvc-pg-migrate ledgersvc-go-vendor ledgersvc-go-gen
 ledgersvc-test:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'go test -coverprofile=c.out -failfast -timeout 5m ./...'
+	${COMPOSE} run --rm ledgersvc-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./... -json > coverage.json'
 ledgersvc-serverd:
 	${COMPOSE} run --rm --service-ports ledgersvc-go sh -c 'go run cmd/serverd/*.go'
 
