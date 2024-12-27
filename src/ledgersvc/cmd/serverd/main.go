@@ -4,26 +4,35 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/kneadCODE/fursave/src/golib/config"
 	"github.com/kneadCODE/fursave/src/golib/httpserver"
+	"github.com/kneadCODE/fursave/src/golib/telemetry"
 )
 
 func main() {
 	log.Println("Welcome to Fursave")
 	ctx := context.Background()
 
-	_, err := config.Init()
+	ctx, err := config.Init()
 	if err != nil {
 		log.Fatalf("Failed to initialize App: %v", err)
 	}
+
+	ctx, telShutdownF, err := telemetry.Init(ctx)
+	defer telShutdownF()
 
 	s, err := initServer(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, os.Interrupt, os.Kill)
+	defer cancel()
 	s.Start(ctx)
 }
 

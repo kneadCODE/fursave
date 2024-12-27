@@ -28,7 +28,7 @@ func TestAppFromContext(t *testing.T) {
 	require.EqualValues(t, newCfg, cfg)
 }
 
-func Test_setAppInContext(t *testing.T) {
+func Test_SetAppInContext(t *testing.T) {
 	// Given:
 	ctx := context.Background()
 
@@ -40,7 +40,7 @@ func Test_setAppInContext(t *testing.T) {
 
 	// When:
 	newCfg := App{Env: EnvDev}
-	ctx = setAppInContext(ctx, newCfg)
+	ctx = SetAppInContext(ctx, newCfg)
 
 	// When:
 	require.EqualValues(t, newCfg, AppFromContext(ctx))

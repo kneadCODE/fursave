@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/http/pprof"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/kneadCODE/fursave/src/golib/telemetry"
 )
 
 // NewServer returns a new instance of Server.
@@ -52,7 +52,7 @@ func (s *Server) Start(ctx context.Context) error {
 	startErrChan := make(chan error, 1)
 
 	go func() {
-		log.Println(fmt.Sprintf("Starting HTTP server on %s", s.srv.Addr)) // TODO: Fix this
+		telemetry.CaptureInfoEvent(ctx, "Starting HTTP server on %s", s.srv.Addr)
 		startErrChan <- s.srv.ListenAndServe()
 	}()
 
@@ -73,18 +73,18 @@ func (s *Server) stop(ctx context.Context) error {
 	cancelCtx, cancel := context.WithTimeout(context.Background(), s.gracefulShutdownTimeout) // Cannot rely on root context as that might have been cancelled.
 	defer cancel()
 
-	log.Println("Attempting HTTP server graceful shutdown")
+	telemetry.CaptureInfoEvent(ctx, "Attempting HTTP server graceful shutdown")
 	if err := s.srv.Shutdown(cancelCtx); err != nil {
-		log.Println(fmt.Errorf("httpserver:Server: graceful shutdown failed: %w", err))
+		telemetry.CaptureErrorEvent(ctx, fmt.Errorf("httpserver:Server: graceful shutdown failed: %w", err))
 
-		log.Println("Attempting HTTP server force shutdown")
+		telemetry.CaptureInfoEvent(ctx, "Attempting HTTP server force shutdown")
 		if err = s.srv.Close(); err != nil {
-			log.Println(fmt.Errorf("httpserver:Server: force shutdown failed: %w", err))
+			telemetry.CaptureErrorEvent(ctx, fmt.Errorf("httpserver:Server: force shutdown failed: %w", err))
 			return err
 		}
 	}
 
-	log.Println("HTTP server shutdown complete")
+	telemetry.CaptureInfoEvent(ctx, "HTTP server shutdown complete")
 
 	return nil
 }

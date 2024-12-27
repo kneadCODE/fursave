@@ -31,7 +31,6 @@ jobs:
             -Dsonar.organization=kneadcode
             -Dsonar.cpd.exclusions=**/*_test.go
             -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.go.tests.reportPaths=coverage.json
             -Dsonar.exclusions=**/*_test.go
             -Dsonar.tests=.
             -Dsonar.test.inclusions=**/*_test.go
@@ -62,7 +61,6 @@ jobs:
             -Dsonar.organization=kneadcode
             -Dsonar.cpd.exclusions=**/*_test.go
             -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.go.tests.reportPaths=coverage.json
             -Dsonar.exclusions=**/*_test.go
             -Dsonar.tests=.
             -Dsonar.test.inclusions=**/*_test.go
