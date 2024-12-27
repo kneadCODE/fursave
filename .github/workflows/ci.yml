@@ -5,8 +5,7 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  test-golib:
-    name: test-golib
+  ci-golib:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -16,8 +15,28 @@ jobs:
         run: make golib-setup
       - name: run-tests
         run: make golib-test
-  test-ledgersvc:
-    name: test-ledgersvc
+      - name: sonarqube-setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+      - name: sonarqube-scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_GOLIB }}
+          GOPATH: /src/golib
+        with:
+          projectBaseDir: src/golib/
+          args:
+            -Dsonar.projectKey=fursave_golib
+            -Dsonar.organization=kneadcode
+            -Dsonar.cpd.exclusions=**/*_test.go
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.go.tests.reportPaths=coverage.json
+            -Dsonar.exclusions=**/*_test.go
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/*_test.go
+            -Dsonar.sources=.
+  ci-ledgersvc:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -27,3 +46,24 @@ jobs:
         run: make ledgersvc-setup
       - name: run-tests
         run: make ledgersvc-test
+      - name: sonarqube-setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+      - name: sonarqube-scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_LEDGERSVC }}
+          GOPATH: /src/ledgersvc
+        with:
+          projectBaseDir: src/ledgersvc/
+          args:
+            -Dsonar.projectKey=fursave_ledgersvc
+            -Dsonar.organization=kneadcode
+            -Dsonar.cpd.exclusions=**/*_test.go
+            -Dsonar.go.coverage.reportPaths=coverage.out
+            -Dsonar.go.tests.reportPaths=coverage.json
+            -Dsonar.exclusions=**/*_test.go
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/*_test.go
+            -Dsonar.sources=.
