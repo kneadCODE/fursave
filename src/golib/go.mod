@@ -3,6 +3,7 @@ module github.com/kneadCODE/fursave/src/golib
 go 1.23.4
 
 require (
+	github.com/go-chi/chi/v5 v5.2.0
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.33.0
 	go.opentelemetry.io/otel/sdk v1.33.0
