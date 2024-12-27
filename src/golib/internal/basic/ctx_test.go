@@ -1,4 +1,4 @@
-package cfg
+package basic
 
 import (
 	"testing"
@@ -7,5 +7,5 @@ import (
 )
 
 func TestContextKey_String(t *testing.T) {
-	require.Equal(t, "app config context value abc", ContextKey{"abc"}.String())
+	require.Equal(t, "golib:context_key:abc", ContextKey{"abc"}.String())
 }

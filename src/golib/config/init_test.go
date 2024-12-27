@@ -35,7 +35,7 @@ func TestInit(t *testing.T) {
 		},
 		"success": {
 			mockRes:                             resource.NewWithAttributes(semconv.SchemaURL, semconv.DeploymentEnvironment("development")),
-			expApp:                              App{Env: EnvDev, res: resource.NewWithAttributes(semconv.SchemaURL, semconv.DeploymentEnvironment("development"))},
+			expApp:                              App{Env: EnvDev, Res: resource.NewWithAttributes(semconv.SchemaURL, semconv.DeploymentEnvironment("development"))},
 			mockEnvStr:                          "development",
 			expNewOTELResourceFromEnvStubCalled: true,
 		},

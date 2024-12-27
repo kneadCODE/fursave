@@ -18,7 +18,7 @@ func Init() (ctx context.Context, err error) {
 	if err != nil {
 		return
 	}
-	ctx = setAppInContext(ctx, cfg)
+	ctx = SetAppInContext(ctx, cfg)
 	basicLogger.Println("App initialized")
 	return
 }

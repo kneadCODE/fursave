@@ -9,7 +9,7 @@ import (
 type App struct {
 	// Env is the environment in which the application is running
 	Env Environment
-	res *resource.Resource
+	Res *resource.Resource
 }
 
 func newAppFromEnv(ctx context.Context) (App, error) {
@@ -18,7 +18,7 @@ func newAppFromEnv(ctx context.Context) (App, error) {
 		return App{}, err
 	}
 
-	cfg := App{res: res, Env: Environment(env)}
+	cfg := App{Res: res, Env: Environment(env)}
 
 	if err = cfg.Env.IsValid(); err != nil {
 		return App{}, err

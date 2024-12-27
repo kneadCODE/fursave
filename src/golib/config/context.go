@@ -3,7 +3,7 @@ package config
 import (
 	"context"
 
-	"github.com/kneadCODE/fursave/src/golib/internal/cfg"
+	"github.com/kneadCODE/fursave/src/golib/internal/basic"
 )
 
 // AppFromContext retrieves the App from context if exists else return a new App
@@ -14,8 +14,9 @@ func AppFromContext(ctx context.Context) App {
 	return App{}
 }
 
-var appCtxKey = cfg.ContextKey{Name: "app-config"}
-
-func setAppInContext(ctx context.Context, cfg App) context.Context {
+// SetAppInContext sets App in the given context
+func SetAppInContext(ctx context.Context, cfg App) context.Context {
 	return context.WithValue(ctx, appCtxKey, cfg)
 }
+
+var appCtxKey = basic.ContextKey{Name: "app-config"}
