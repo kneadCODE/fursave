@@ -20,7 +20,7 @@ jobs:
           args:
             -Dsonar.projectKey=fursave_base
             -Dsonar.organization=kneadcode
-            -Dsonar.exclusions=src/
+            -Dsonar.exclusions=src/**/*
   scan-golib:
     name: scan-golib
     runs-on: ubuntu-latest
@@ -37,6 +37,7 @@ jobs:
           args:
             -Dsonar.projectKey=fursave_golib
             -Dsonar.organization=kneadcode
+            -Dsonar.cpd.exclusions=**/*_test.go
   scan-ledgersvc:
     name: scan-ledgersvc
     runs-on: ubuntu-latest
@@ -53,3 +54,4 @@ jobs:
           args:
             -Dsonar.projectKey=fursave_ledgersvc
             -Dsonar.organization=kneadcode
+            -Dsonar.cpd.exclusions=**/*_test.go
