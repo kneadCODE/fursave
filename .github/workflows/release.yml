@@ -1,0 +1,26 @@
+name: Release
+concurrency: PRODUCTION
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print run info
+        uses: ./.github/actions/print-run-info
+      - name: Print inputs context
+        run: echo "${{ toJSON(inputs) }}"
+      - name: Ensure main or release tag
+        uses: ./.github/actions/ensure-main-release
+  trigger-cd:
+    name: CD
+    needs: [prepare]
+    uses: ./.github/workflows/cd.yml
+    with:
+      environment: PRODUCTION

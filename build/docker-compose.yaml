@@ -39,7 +39,7 @@ services:
   ledgersvc-go:
     build:
       context: .
-      dockerfile: ./.ledgersvc.Dockerfile
+      dockerfile: ./go-local.Dockerfile
     networks:
       - net
     ports:

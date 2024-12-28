@@ -5,83 +5,98 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  ci-golib:
+####### CI Stage Start ######
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print run info
+        uses: ./.github/actions/print-run-info
+      - name: Print inputs context
+        run: echo "${{ toJSON(inputs) }}"
+
+####### Run tests & Docker Build Start ######
+  test-and-build:
+    name: Test & Build
+    needs: [prepare]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
+      matrix:
+        service: [ golib, ledgersvc ]
     steps:
-      - uses: actions/checkout@v4
-      - name: setup
-        run: make golib-setup
-      - name: run-tests
-        run: make golib-test
-      - name: sonarqube-setup-go
-        uses: actions/setup-go@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          go-version: '1.23'
-      - name: sonarqube-scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_GOLIB }}
-          GOPATH: /src/golib
+          fetch-depth: 0 # Disabling shallow clone for SonarQube
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
+      - name: Run Setup
+        run: make ${{ matrix.service }}-setup
+      - name: Run Tests
+        run: make ${{ matrix.service }}-test
+      - name: SonarQube Scan
+        uses: ./.github/actions/sonarqube-scan
         with:
-          projectBaseDir: src/golib/
-          args:
-            -Dsonar.projectKey=fursave_golib
-            -Dsonar.organization=kneadcode
-            -Dsonar.cpd.exclusions=**/*_test.go
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.exclusions=**/*_test.go
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/*_test.go
-            -Dsonar.sources=.
-      - name: codacy-coverage
-        shell: bash
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go --partial -r src/golib/coverage.out
+          token: ${{ secrets[format('SONAR_TOKEN_{0}', matrix.service)] }}
+          projectBaseDir: src/${{ matrix.service }}/
+      - name: Codacy coverage report
+        run: make -f build/Makefile ${{ matrix.service }}-codacy-coverage
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-  ci-ledgersvc:
+      - name: Docker Build
+        run: echo Docker build
+####### Run tests & Docker Build End ######
+
+####### SAST Start ######
+  sonar-scan-root:
+    name: SonarQube scan root
+    needs: [ prepare ]
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
     steps:
-      - uses: actions/checkout@v4
-      - name: setup
-        run: make ledgersvc-setup
-      - name: run-tests
-        run: make ledgersvc-test
-      - name: sonarqube-setup-go
-        uses: actions/setup-go@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          go-version: '1.23'
-      - name: sonarqube-scan
-        uses: SonarSource/sonarqube-scan-action@v4
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_LEDGERSVC }}
-          GOPATH: /src/ledgersvc
+          fetch-depth: 0 # Disabling shallow clone for SonarQube
+      - name: SonarQube Scan
+        uses: ./.github/actions/sonarqube-scan
         with:
-          projectBaseDir: src/ledgersvc/
-          args:
-            -Dsonar.projectKey=fursave_ledgersvc
-            -Dsonar.organization=kneadcode
-            -Dsonar.cpd.exclusions=**/*_test.go
-            -Dsonar.go.coverage.reportPaths=coverage.out
-            -Dsonar.exclusions=**/*_test.go
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/*_test.go
-            -Dsonar.sources=.
-      - name: codacy-coverage
-        shell: bash
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report --force-coverage-parser go --partial -r src/ledgersvc/coverage.out
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          token: ${{ secrets.SONAR_TOKEN_BASE }}
+
   codacy-coverage-report-final:
-    name: codacy-coverage-report
+    name: Codacy coverage report final
+    needs: [test-and-build]
     runs-on: ubuntu-latest
-    needs: [ci-golib, ci-ledgersvc]
     steps:
-      - name: report
-        shell: bash
+      - name: Report
         run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+####### SAST End ######
+
+####### Docker Push Start ######
+  docker-push:
+    name: Docker Push
+    needs: [sonar-scan-root, codacy-coverage-report-final]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [ ledgersvc ]
+    steps:
+      - name: Push
+        run: echo Docker Push # TODO: Implement this
+####### Docker Push End ######
+
+####### CI Stage End ######
+
+
+####### CD Stage ######
+  trigger-cd:
+    name: CD
+    needs: [docker-push]
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/cd.yml
+    with:
+      environment: STAGING

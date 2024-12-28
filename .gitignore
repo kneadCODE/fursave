@@ -26,3 +26,6 @@ src/**/pgorm/**
 
 # env file
 .env
+
+# Codacy coverage reporter download by our build/Makefile
+codacy-cov.sh

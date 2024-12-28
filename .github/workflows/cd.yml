@@ -1,0 +1,46 @@
+name: CD
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+jobs:
+  prepare: # Entry job to allow manual re-running the whole CD workflow from within the CI job run
+    name: Prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print run info
+        uses: ./.github/actions/print-run-info
+  deploy-ledgersvc:
+    name: Deploy Ledger Service
+    environment: ${{ inputs.environment }}
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy # TODO: Implement this
+        run: echo Deploying...
+  deploy-svc2:
+    name: Deploy svc2
+    environment: ${{ inputs.environment }}
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy # TODO: Implement this
+        run: echo Deploying...
+  deploy-svc3:
+    name: Deploy svc2
+    environment: ${{ inputs.environment }}
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Deploy # TODO: Implement this
+        run: echo Deploying...
