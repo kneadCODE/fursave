@@ -1,0 +1,10 @@
+name: Ensure main/release (tag v*)
+runs:
+  using: "composite"
+  steps:
+    - name: Check
+      shell: bash
+      if: ${{ !startsWith(github.ref, 'refs/tags/v*') && github.ref != 'refs/heads/main' }}
+      run: |
+        { echo "!!!!!!WRONG branch/tag!!!!!!!! Quitting..."; } 2> /dev/null
+        exit 1

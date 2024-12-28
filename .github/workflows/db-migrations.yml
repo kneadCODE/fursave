@@ -1,0 +1,47 @@
+name: DB Migrations
+concurrency: PRODUCTION
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run migrations on'
+        required: true
+        type: environment
+      service:
+        description: 'Service to run migrations on'
+        required: true
+        type: choice
+        options:
+          - ledgersvc
+      database:
+        description: 'Which database?'
+        required: true
+        type: string
+      direction:
+        description: 'Direction of migration (up/down)'
+        required: true
+        type: choice
+        options:
+          - up
+          - down
+jobs:
+  prepare:
+    name: Prepare # Using separate job to be able to print before the approval stage triggered by the `environment` setting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Print run info
+        uses: ./.github/actions/print-run-info
+      - name: Print inputs context
+        run: echo "${{ toJSON(inputs) }}"
+      - name: Ensure main or release tag
+        uses: ./.github/actions/ensure-main-release
+  run-migrations:
+    name: Run migrations
+    needs: [prepare]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Run # TODO: Implement this
+        run: echo Running...
