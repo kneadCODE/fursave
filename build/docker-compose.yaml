@@ -3,7 +3,7 @@ services:
   golib-go:
     image: golang:1.23-alpine
     env_file:
-      - path: ./.golib.env
+      - path: ../src/golib/.compose.env
     volumes:
       - ../src/golib:/src:cached
       - golib-build-cache:/root/.cache/go-build
@@ -22,14 +22,14 @@ services:
     ports:
       - "5433:5432"
     env_file:
-      - path: ./.ledgersvc.env
+      - path: ../src/ledgersvc/.compose.env
   ledgersvc-pg-migrate:
     image: migrate/migrate:v4.18.1
     entrypoint: "" # Overriding in order to write command in Makefile
     networks:
       - net
     env_file:
-      - path: ./.ledgersvc.env
+      - path: ../src/ledgersvc/.compose.env
     volumes:
       - ../src/ledgersvc/db-scripts/pg/migrations:/migrations
     depends_on:
@@ -45,7 +45,7 @@ services:
     ports:
       - "4000:4000"
     env_file:
-      - path: ./.ledgersvc.env
+      - path: ../src/ledgersvc/.compose.env
     volumes:
       - ../src/ledgersvc:/src:cached
       - ../src/golib:/golib:cached

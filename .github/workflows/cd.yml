@@ -6,8 +6,8 @@ on:
         type: string
         required: true
 jobs:
-  prepare: # Entry job to allow manual re-running the whole CD workflow from within the CI job run
-    name: Prepare
+  init: # Entry job to allow manual re-running the whole CD workflow from within the CI job run
+    name: Init
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,7 +17,7 @@ jobs:
   deploy-ledgersvc:
     name: Deploy Ledger Service
     environment: ${{ inputs.environment }}
-    needs: [prepare]
+    needs: [init]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
   deploy-svc2:
     name: Deploy svc2
     environment: ${{ inputs.environment }}
-    needs: [prepare]
+    needs: [init]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,7 +37,7 @@ jobs:
   deploy-svc3:
     name: Deploy svc2
     environment: ${{ inputs.environment }}
-    needs: [prepare]
+    needs: [init]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
