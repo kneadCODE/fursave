@@ -27,6 +27,10 @@ ledgersvc-test:
 	${COMPOSE} run --rm ledgersvc-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
 ledgersvc-serverd:
 	${COMPOSE} run --rm --service-ports ledgersvc-go sh -c 'go run cmd/serverd/*.go'
+ledgersvc-build-binaries:
+	${COMPOSE} run --rm ledgersvc-go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
 
 COMPOSE_BIN := docker compose
 COMPOSE := ${COMPOSE_BIN} -f build/docker-compose.yaml -p fursave
+
+DOCKER_BIN := docker

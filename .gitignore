@@ -29,3 +29,5 @@ src/**/pgorm/**
 
 # Codacy coverage reporter download by our build/Makefile
 codacy-cov.sh
+
+src/**/build/binaries/
