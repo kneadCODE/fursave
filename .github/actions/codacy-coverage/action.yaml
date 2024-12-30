@@ -1,0 +1,27 @@
+name: Codacy Coverage
+inputs:
+  token:
+    description: 'The codacy project token'
+    required: true
+  project:
+    description: 'The project name in src/. If no project specified, it is considered the final submission'
+  language:
+    description: 'The language'
+runs:
+  using: "composite"
+  steps:
+    - name: Submit partial coverage (Go)
+      if: ${{ inputs.project != '' && inputs.language == 'go'}}
+      shell: bash
+      run: |
+        bash <(curl -Ls https://coverage.codacy.com/get.sh) report --partial \
+          --force-coverage-parser go -r src/${{ matrix.project }}/coverage.out
+      env:
+        CODACY_PROJECT_TOKEN: ${{ inputs.token }}
+    - name: Submit final coverage
+      if: ${{ inputs.project == '' }}
+      shell: bash
+      run: |
+        bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+      env:
+        CODACY_PROJECT_TOKEN: ${{ inputs.token }}

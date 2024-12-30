@@ -17,9 +17,9 @@ jobs:
       - name: Print inputs context
         run: echo "${{ toJSON(inputs) }}"
 
-  ####### Run tests & Docker Build Start ######
+  ####### Run tests & build Start ######
   test-and-build:
-    name: Test & Build
+    name: Test & Build (${{ matrix.project }})
     needs: [ init ]
     runs-on: ubuntu-latest
     permissions:
@@ -30,39 +30,47 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [ golib, ledgersvc ]
+        include:
+          - project: golib
+            type: library
+            language: go
+          - project: ledgersvc
+            type: application
+            language: go
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Disabling shallow clone for SonarQube
       - name: Run setup
-        run: make ${{ matrix.service }}-setup
+        run: make ${{ matrix.project }}-setup
       - name: Run tests
-        run: make ${{ matrix.service }}-test
+        run: make ${{ matrix.project }}-test
       - name: Build binaries
-        if: ${{ !endsWith(matrix.service, 'lib') }}
-        run: make ${{ matrix.service }}-build-binaries
+        if: ${{ matrix.type == 'application' && matrix.language == 'go' }}
+        run: make ${{ matrix.project }}-build-binaries
       - name: SonarQube scan
         uses: ./.github/actions/sonarqube-scan
         with:
-          token: ${{ secrets[format('SONAR_TOKEN_{0}', matrix.service)] }}
-          project-dir: src/${{ matrix.service }}/
+          token: ${{ secrets[format('SONAR_TOKEN_{0}', matrix.project)] }}
+          project-dir: src/${{ matrix.project }}/
       - name: Codacy coverage report
-        run: make -f build/Makefile ${{ matrix.service }}-codacy-coverage
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        uses: ./.github/actions/codacy-coverage
+        with:
+          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          project: ${{ matrix.project }}
+          language: ${{ matrix.language }}
       - name: Docker Build/Push
-        if: ${{ !endsWith(matrix.service, 'lib') }}
+        if: ${{ matrix.type == 'application' }}
         uses: ./.github/actions/docker-build-push
         with:
-          service: ${{ matrix.service }}
+          project: ${{ matrix.project }}
           registry: ghcr.io
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-prefix: ${{ github.repository }}
           push: ${{ github.event_name != 'pull_request' }}
-  ####### Run tests & Docker Build End ######
+  ####### Run tests & build End ######
 
   ####### SAST Start ######
   sonar-scan-root:
@@ -84,10 +92,12 @@ jobs:
     needs: [ test-and-build ]
     runs-on: ubuntu-latest
     steps:
-      - name: Report
-        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) final
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Submit final report
+        uses: ./.github/actions/codacy-coverage
+        with:
+          token: ${{ secrets.CODACY_PROJECT_TOKEN }}
   ####### SAST End ######
 
   ####### CI Stage End ######

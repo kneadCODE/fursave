@@ -1,36 +1,45 @@
 teardown:
 	${COMPOSE} down --rmi local
 
-golib-go-vendor:
-	${COMPOSE} run --rm golib-go sh -c 'go mod vendor'
-golib-go-clean-vendor:
-	${COMPOSE} run --rm golib-go sh -c 'go mod tidy && go mod vendor'
-golib-setup: golib-go-vendor
-golib-test:
-	${COMPOSE} run --rm golib-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
+golib-setup: P=golib
+golib-setup: go-vendor
 
-ledgersvc-pg:
-	${COMPOSE} up -d ledgersvc-pg
+golib-test: P=golib
+golib-test: go-test
+
 ledgersvc-pg-migrate:
 	${COMPOSE} run --rm ledgersvc-pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL up'
 ledgersvc-pg-migrate-down:
 	${COMPOSE} run --rm ledgersvc-pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL down'
 ledgersvc-pg-migrate-redo: ledgersvc-pg-migrate-down ledgersvc-pg-migrate
-ledgersvc-go-vendor:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'go mod vendor'
-ledgersvc-go-clean-vendor:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'go mod tidy && go mod vendor'
-ledgersvc-go-gen:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'go generate ./...'
-ledgersvc-setup: ledgersvc-pg ledgersvc-pg-migrate ledgersvc-go-vendor ledgersvc-go-gen
-ledgersvc-test:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
+
+ledgersvc-setup: P=ledgersvc
+ledgersvc-setup: pg ledgersvc-pg-migrate go-vendor go-gen
+
+ledgersvc-test: P=ledgersvc
+ledgersvc-test: go-test
+
+ledgersvc-build-binaries: P=ledgersvc
+ledgersvc-build-binaries: go-build-binaries
+
 ledgersvc-serverd:
 	${COMPOSE} run --rm --service-ports ledgersvc-go sh -c 'go run cmd/serverd/*.go'
-ledgersvc-build-binaries:
-	${COMPOSE} run --rm ledgersvc-go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
 
+# Reusable commands
+go-vendor:
+	${COMPOSE} run --rm ${P}-go sh -c 'go mod vendor'
+go-clean-vendor:
+	${COMPOSE} run --rm ${P}-go sh -c 'go mod tidy && go mod vendor'
+go-gen:
+	${COMPOSE} run --rm ${P}-go sh -c 'go generate ./...'
+go-test:
+	${COMPOSE} run --rm ${P}-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
+go-build-binaries:
+	${COMPOSE} run --rm ${P}-go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
+
+pg:
+	${COMPOSE} up -d ${P}-pg
+
+# Binaries
 COMPOSE_BIN := docker compose
 COMPOSE := ${COMPOSE_BIN} -f build/docker-compose.yaml -p fursave
-
-DOCKER_BIN := docker
