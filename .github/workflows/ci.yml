@@ -5,7 +5,6 @@ on:
   pull_request:
     branches: [ "main" ]
 jobs:
-  ####### CI Stage Start ######
   init:
     name: Init
     runs-on: ubuntu-latest
@@ -86,6 +85,22 @@ jobs:
         uses: ./.github/actions/sonarqube-scan
         with:
           token: ${{ secrets.SONAR_TOKEN_BASE }}
+  codeql-scan-actions:
+    name: CodeQL scan GitHub Actions
+    needs: [init]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: actions
+          build-mode: none
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:actions"
 
   codacy-coverage-report-final:
     name: Codacy coverage report final
@@ -100,13 +115,19 @@ jobs:
           token: ${{ secrets.CODACY_PROJECT_TOKEN }}
   ####### SAST End ######
 
-  ####### CI Stage End ######
+  post-ci:
+    name: Post CI
+    needs: [ sonar-scan-root, codeql-scan-actions, codacy-coverage-report-final ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post CI
+        run: echo "For now I am here just for the GitHub check to indicate whole CI flow is over"
 
 
   ####### CD Stage ######
   trigger-cd:
     name: CD
-    needs: [codacy-coverage-report-final]
+    needs: [ post-ci ]
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/cd.yml
     with:
