@@ -7,8 +7,8 @@ on:
         description: 'Environment to run migrations on'
         required: true
         type: environment
-      service:
-        description: 'Service to run migrations on'
+      project:
+        description: 'Project to run migrations on'
         required: true
         type: choice
         options:
