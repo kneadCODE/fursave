@@ -1,0 +1,18 @@
+name: "Cleanup Old Github Packages"
+on:
+  schedule:
+    - cron: "15 16 * * *"
+jobs:
+  clean-docker:
+    name: Clean Docker images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [ ledgersvc ]
+    steps:
+      - name: Delete images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ github.repository }}/${{ matrix.service }}
+          package-type: container
+          min-versions-to-keep: 25

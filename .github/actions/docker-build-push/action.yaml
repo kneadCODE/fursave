@@ -3,11 +3,17 @@ inputs:
   service:
     description: 'The service name in src/'
     required: true
+  registry:
+    description: 'The registry name'
+    required: true
   registry-username:
     description: 'The username for the registry to push to'
     required: true
   registry-password:
     description: 'The password for the registry to push to'
+    required: true
+  image-prefix:
+    description: 'The prefix for the image name'
     required: true
   push:
     description: 'Push the image to registry or not'
@@ -21,12 +27,14 @@ runs:
       if: ${{ inputs.push == 'true' }}
       uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/${{ inputs.service }}
-    - name: Log in to GitHub Packages
+        images: ${{ inputs.registry }}/${{ inputs.image-prefix }}/${{ inputs.service }}
+        labels: org.opencontainers.image.description=${{ inputs.service }}
+        tags: type=sha
+    - name: Log in to Registry
       if: ${{ inputs.push == 'true' }}
       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 #v3.3.0
       with:
-        registry: ${{ env.REGISTRY }}
+        registry: ${{ inputs.registry }}
         username: ${{ inputs.registry-username }}
         password: ${{ inputs.registry-password }}
     - name: Docker Build & Push
@@ -38,10 +46,3 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         push: ${{ inputs.push == 'true' }}
-    - name: Generate artifact attestation
-      if: ${{ inputs.push == 'true' }}
-      uses: actions/attest-build-provenance@v2
-      with:
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_PREFIX }}/${{ inputs.service }}
-        subject-digest: ${{ steps.build-push.outputs.digest }}
-        push-to-registry: true
