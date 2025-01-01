@@ -30,7 +30,7 @@ runs:
       with:
         images: ${{ inputs.registry }}/${{ inputs.image-prefix }}/${{ inputs.project }}
         labels: org.opencontainers.image.description=${{ inputs.project }}
-        tags: type=sha
+        tags: type=sha,format=long,prefix=
     - name: Log in to Registry
       if: ${{ inputs.push == 'true' }}
       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 #v3.3.0

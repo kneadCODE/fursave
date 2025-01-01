@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
@@ -39,9 +41,13 @@ func main() {
 }
 
 func initServer(ctx context.Context) (*httpserver.Server, error) {
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse PORT: %w", err)
+	}
 	s, err := httpserver.NewServer(
 		ctx,
-		httpserver.WithPort(4000),
+		httpserver.WithPort(port),
 		httpserver.WithProfilingHandler(),
 		httpserver.WithReadinessHandler(func(http.ResponseWriter, *http.Request) {
 			log.Println("readiness called")

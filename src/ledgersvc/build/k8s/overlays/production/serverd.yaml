@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serverd
+spec:
+  revisionHistoryLimit: 3
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: serverd
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "25m"
+          limits:
+            memory: "64Mi"
+            cpu: "50m"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: serverd
+spec:
+  minAvailable: 2
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: serverd
+spec:
+  minReplicas: 3
+  maxReplicas: 6

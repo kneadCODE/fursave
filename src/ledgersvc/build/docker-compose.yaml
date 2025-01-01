@@ -33,7 +33,7 @@ services:
   go:
     build:
       context: .
-      dockerfile: ../../../build/go-local.Dockerfile
+      dockerfile: ../../../build/Dockerfile.go.local
     networks:
       - net
     ports:

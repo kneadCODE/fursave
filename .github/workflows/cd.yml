@@ -22,6 +22,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Prepare k8s manifests
+        working-directory: src/ledgersvc/build/k8s
+        run: | # TODO: Consider putting all envvars to be in kustomization.yaml only and run envsubst only on that file
+          for f in base/*.yaml; do echo "$(envsubst < $f)" > $f; done
+          for f in overlays/${{ inputs.environment }}/*.yaml; do echo "$(envsubst < $f)" > $f; done
+          mkdir -p generated
+          kubectl kustomize overlays/${{ inputs.environment }} -o generated/
+        env:
+          KUST_IMAGE_SERVERD_NAME: "ghcr.io/${{ github.repository }}/ledgersvc"
+          KUST_IMAGE_SERVERD_TAG: ${{ github.sha }}
       - name: Deploy # TODO: Implement this
         run: echo Deploying...
   deploy-svc2:
