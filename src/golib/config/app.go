@@ -6,6 +6,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
+// App represents the application configuration.
 type App struct {
 	// Env is the environment in which the application is running
 	Env Environment

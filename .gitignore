@@ -22,12 +22,13 @@ vendor/
 go.work
 go.work.sum
 
-src/**/pgorm/**
-
-# env file
-.env
+.DS_Store
 
 # Codacy coverage reporter download by our build/Makefile
 codacy-cov.sh
 
+src/**/pgorm/**/*
 src/**/build/binaries/
+
+.vscode
+.idea

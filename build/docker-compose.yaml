@@ -3,7 +3,10 @@ services:
   golib-go:
     image: golang:1.23-alpine
     env_file:
-      - path: ../src/golib/.compose.env
+      - path: ../src/golib/.env
+    environment: # Overriding for running inside container
+      GOARCH: amd64
+      GOOS: linux
     volumes:
       - ../src/golib:/src:cached
       - golib-build-cache:/root/.cache/go-build
@@ -21,15 +24,19 @@ services:
       - net
     ports:
       - "5433:5432"
-    env_file:
-      - path: ../src/ledgersvc/.compose.env
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: trustmebro
+      POSTGRES_DB: pg
   ledgersvc-pg-migrate:
     image: migrate/migrate:v4.18.1
     entrypoint: "" # Overriding in order to write command in Makefile
     networks:
       - net
-    env_file:
-      - path: ../src/ledgersvc/.compose.env
+    environment:
+      PG_URL: postgres://@ledgersvc-pg:5432/pg?sslmode=disable
+      PGUSER: pg
+      PGPASSWORD: trustmebro
     volumes:
       - ../src/ledgersvc/db-scripts/pg/migrations:/migrations
     depends_on:
@@ -45,7 +52,11 @@ services:
     ports:
       - "4000:4000"
     env_file:
-      - path: ../src/ledgersvc/.compose.env
+      - path: ../src/ledgersvc/.env
+    environment: # Overriding for running inside container
+      GOARCH: amd64
+      GOOS: linux
+      PSQL_HOST: ledgersvc-pg
     volumes:
       - ../src/ledgersvc:/src:cached
       - ../src/golib:/golib:cached

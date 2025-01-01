@@ -12,7 +12,17 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-// NewOTELResourceFromEnv returns a new instance of OTEL resource from env
+// NewOTELResourceFromEnv creates a new OpenTelemetry resource from environment variables.
+// It loads various resource attributes from the environment, including service, container,
+// Kubernetes, and cloud resources. It also sets the deployment environment attribute.
+//
+// Parameters:
+//   - ctx: The context for resource creation.
+//
+// Returns:
+//   - res: The created OpenTelemetry resource.
+//   - env: The deployment environment value.
+//   - err: An error if any occurred during resource creation or if required environment variables are missing.
 func NewOTELResourceFromEnv(ctx context.Context) (res *resource.Resource, env string, err error) {
 	attrs, err := loadServiceResourceFromEnv()
 	if err != nil {

@@ -6,7 +6,7 @@ no-tests: true # Because the generated tests runs `dropdb` which will be trouble
 add-soft-deletes: true
 strict-verify-mod-version: true
 psql:
-  host: ledgersvc-pg
+  # host: Will be filled in via envvar PSQL_HOST
   dbname: pg
   port: 5432
   user: pg
