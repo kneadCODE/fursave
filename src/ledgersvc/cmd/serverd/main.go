@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/go-chi/chi/v5"
@@ -37,9 +38,13 @@ func main() {
 }
 
 func initServer(ctx context.Context) (*httpserver.Server, error) {
+	port, err := strconv.Atoi(os.Getenv("PORT"))
+	if err != nil {
+		return nil, err
+	}
 	s, err := httpserver.NewServer(
 		ctx,
-		httpserver.WithPort(4000),
+		httpserver.WithPort(port),
 		httpserver.WithProfilingHandler(),
 		httpserver.WithReadinessHandler(func(w http.ResponseWriter, r *http.Request) {
 			log.Println("readiness called")

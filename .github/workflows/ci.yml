@@ -131,4 +131,4 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/cd.yml
     with:
-      environment: STAGING
+      environment: staging
