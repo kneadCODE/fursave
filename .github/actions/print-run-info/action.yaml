@@ -1,4 +1,5 @@
 name: Print Run Info
+description: 'This action prints the GitHub context information'
 runs:
   using: "composite"
   steps:
