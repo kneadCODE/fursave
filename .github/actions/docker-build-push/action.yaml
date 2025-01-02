@@ -1,4 +1,5 @@
 name: Docker Build/Push
+description: 'Build and push Docker images'
 inputs:
   project:
     description: 'The project name in src/'
