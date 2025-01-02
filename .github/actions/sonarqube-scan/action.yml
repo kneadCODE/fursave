@@ -1,4 +1,5 @@
 name: SonarQube Scan
+description: 'This action runs a SonarQube scan on the specified project directory'
 inputs:
   token:
     description: 'The SonarQube token'

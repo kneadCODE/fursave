@@ -1,4 +1,5 @@
 name: Ensure main/release (tag v*)
+description: 'Ensure that the branch is main or a release tag'
 runs:
   using: "composite"
   steps:

@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- serverd.yaml
+- ingress.yaml
+
+namespace: ledgersvc
+namePrefix: ledgersvc-
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: ledgersvc
+    includeSelectors: true
+    includeTemplates: true
+  - pairs:
+      app.kubernetes.io/version: v0.0.0 # TODO: Fix this
+      app.kubernetes.io/managed-by: Kustomize
+    includeSelectors: false
+    includeTemplates: true
+
+images:
+- name: image-serverd
+  newName: ${KUST_IMAGE_SERVERD_NAME}
+  newTag: ${KUST_IMAGE_SERVERD_TAG}
