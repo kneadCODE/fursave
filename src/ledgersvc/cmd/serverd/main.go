@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/kneadCODE/fursave/src/golib/config"
 	"github.com/kneadCODE/fursave/src/golib/httpserver"
 	"github.com/kneadCODE/fursave/src/golib/telemetry"
@@ -44,11 +43,7 @@ func initServer(ctx context.Context) (*httpserver.Server, error) {
 		httpserver.WithReadinessHandler(func(w http.ResponseWriter, r *http.Request) {
 			log.Println("readiness called")
 		}),
-		httpserver.WithRESTHandler(func(rtr chi.Router) {
-			rtr.Get("/abc", func(w http.ResponseWriter, r *http.Request) {
-				log.Println("abc called")
-			})
-		}),
+		httpserver.WithRESTHandler(jsonAPIHandler),
 	)
 	if err != nil {
 		return nil, err
