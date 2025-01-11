@@ -1,0 +1,15 @@
+services:
+  go:
+    image: golang:1.23-alpine
+    networks:
+      - net
+    env_file:
+      - path: ../.env
+    environment: # Overriding for running inside container
+      GOARCH: amd64
+      GOOS: linux
+    volumes:
+      - ../:/src/golib:delegated
+    working_dir: /src/golib
+networks:
+  net:
