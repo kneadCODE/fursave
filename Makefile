@@ -1,45 +1,63 @@
-teardown:
-	${COMPOSE} down --rmi local
+# Variables
+COMPOSE_BIN := docker compose
+PROJECT_NAME := fursave
 
-golib-setup: P=golib
+# Teardown
+teardown-all: golib-teardown ledgersvc-teardown
+
+# Golib Service
+COMPOSE_GOLIB := ${COMPOSE_BIN} -f src/golib/build/docker-compose.yaml -p ${PROJECT_NAME}-golib
+golib-teardown: COMPOSE_CMD=${COMPOSE_GOLIB}
+golib-teardown: teardown
+
+golib-clean-vendor: COMPOSE_CMD=${COMPOSE_GOLIB}
+golib-clean-vendor: go-clean-vendor
+
+golib-setup: COMPOSE_CMD=${COMPOSE_GOLIB}
 golib-setup: go-vendor
 
-golib-test: P=golib
+golib-test: COMPOSE_CMD=${COMPOSE_GOLIB}
 golib-test: go-test
 
+# Ledgersvc Service
+COMPOSE_LEDGERSVC := ${COMPOSE_BIN} -f src/ledgersvc/build/docker-compose.yaml -p ${PROJECT_NAME}-ledgersvc
+ledgersvc-teardown: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
+ledgersvc-teardown: teardown
+
+ledgersvc-clean-vendor: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
+ledgersvc-clean-vendor: go-clean-vendor
+
+ledgersvc-pg:
+	${COMPOSE_LEDGERSVC} up -d pg
 ledgersvc-pg-migrate:
-	${COMPOSE} run --rm ledgersvc-pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL up'
+	${COMPOSE_LEDGERSVC} run --rm pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL up'
 ledgersvc-pg-migrate-down:
-	${COMPOSE} run --rm ledgersvc-pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL down'
-ledgersvc-pg-migrate-redo: ledgersvc-pg-migrate-down ledgersvc-pg-migrate
+	${COMPOSE_LEDGERSVC} run --rm pg-migrate sh -c 'sleep 5 && ./migrate -verbose -path /migrations -database $$PG_URL down'
+ledgersvc-pg-migrate-redo: pg-migrate-down pg-migrate
 
-ledgersvc-setup: P=ledgersvc
-ledgersvc-setup: pg ledgersvc-pg-migrate go-vendor go-gen
+ledgersvc-setup: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
+ledgersvc-setup: ledgersvc-pg ledgersvc-pg-migrate go-vendor go-gen
 
-ledgersvc-test: P=ledgersvc
+ledgersvc-test: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
 ledgersvc-test: go-test
 
-ledgersvc-build-binaries: P=ledgersvc
+ledgersvc-build-binaries: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
 ledgersvc-build-binaries: go-build-binaries
 
 ledgersvc-serverd:
-	${COMPOSE} run --rm --service-ports ledgersvc-go sh -c 'go run cmd/serverd/*.go'
+	${COMPOSE_LEDGERSVC} run --rm --service-ports go sh -c 'go run cmd/serverd/*.go'
 
 # Reusable commands
 go-vendor:
-	${COMPOSE} run --rm ${P}-go sh -c 'go mod vendor'
+	${COMPOSE_CMD} run --rm go sh -c 'go mod vendor'
 go-clean-vendor:
-	${COMPOSE} run --rm ${P}-go sh -c 'go mod tidy && go mod vendor'
+	${COMPOSE_CMD} run --rm go sh -c 'go mod tidy && go mod vendor'
 go-gen:
-	${COMPOSE} run --rm ${P}-go sh -c 'go generate ./...'
+	${COMPOSE_CMD} run --rm go sh -c 'go generate ./...'
 go-test:
-	${COMPOSE} run --rm ${P}-go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
+	${COMPOSE_CMD} run --rm go sh -c 'go test -coverprofile=coverage.out -failfast -timeout 5m ./...'
 go-build-binaries:
-	${COMPOSE} run --rm ${P}-go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
+	${COMPOSE_CMD} run --rm go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
 
-pg:
-	${COMPOSE} up -d ${P}-pg
-
-# Binaries
-COMPOSE_BIN := docker compose
-COMPOSE := ${COMPOSE_BIN} -f build/docker-compose.yaml -p fursave
+teardown:
+	${COMPOSE_CMD} down --rmi local
