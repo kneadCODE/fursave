@@ -1,5 +1,8 @@
 module github.com/kneadCODE/fursave/src/golib
 
+// go-discovery: ignore
+// This is a private/experimental module
+
 go 1.23.4
 
 require (

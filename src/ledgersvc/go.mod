@@ -1,5 +1,8 @@
 module github.com/kneadCODE/fursave/src/ledgersvc
 
+// go-discovery: ignore
+// This is a private/experimental moduleT
+
 go 1.23.4
 
 require (
