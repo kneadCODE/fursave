@@ -30,5 +30,13 @@ codacy-cov.sh
 src/**/pgorm/**/*
 src/**/build/binaries/
 
+# IDE
 .vscode
 .idea
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+terraform.plan
+.terraform.lock.hcl
