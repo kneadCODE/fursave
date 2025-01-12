@@ -22,7 +22,7 @@ func NewServer(ctx context.Context, options ...ServerOption) (*Server, error) {
 			WriteTimeout: 10 * time.Second,
 			IdleTimeout:  120 * time.Second,
 			BaseContext: func(net.Listener) context.Context {
-				return ctx // TODO: Fix this
+				return ctx // TODO: Fix this.
 			},
 		},
 		gracefulShutdownTimeout: 10 * time.Second,
@@ -41,7 +41,7 @@ func NewServer(ctx context.Context, options ...ServerOption) (*Server, error) {
 	return s, nil
 }
 
-// Server is the server instance
+// Server is the server instance.
 type Server struct {
 	srv                     *http.Server
 	gracefulShutdownTimeout time.Duration
@@ -79,7 +79,8 @@ func (s *Server) stop(ctx context.Context) error {
 
 		telemetry.CaptureInfoEvent(ctx, "Attempting HTTP server force shutdown")
 		if err = s.srv.Close(); err != nil {
-			telemetry.CaptureErrorEvent(ctx, fmt.Errorf("httpserver:Server: force shutdown failed: %w", err))
+			err = fmt.Errorf("httpserver:Server: force shutdown failed: %w", err)
+			telemetry.CaptureErrorEvent(ctx, err)
 			return err
 		}
 	}
@@ -89,12 +90,12 @@ func (s *Server) stop(ctx context.Context) error {
 	return nil
 }
 
-// ServerOption customizes the Server
+// ServerOption customizes the Server.
 type ServerOption = func(srv *Server, m *chi.Mux) error
 
-// WithPort overrides the default server port with the given value
+// WithPort overrides the default server port with the given value.
 func WithPort(port int) ServerOption {
-	return func(s *Server, m *chi.Mux) error {
+	return func(s *Server, _ *chi.Mux) error {
 		if port <= 0 || port > 65535 {
 			return errors.New("invalid port number")
 		}
@@ -103,9 +104,9 @@ func WithPort(port int) ServerOption {
 	}
 }
 
-// WithReadTimeout overrides the default read timeout with the given value
+// WithReadTimeout overrides the default read timeout with the given value.
 func WithReadTimeout(d time.Duration) ServerOption {
-	return func(s *Server, m *chi.Mux) error {
+	return func(s *Server, _ *chi.Mux) error {
 		if d < 0 {
 			return errors.New("read timeout must be positive")
 		}
@@ -114,9 +115,9 @@ func WithReadTimeout(d time.Duration) ServerOption {
 	}
 }
 
-// WithWriteTimeout overrides the default write timeout with the given value
+// WithWriteTimeout overrides the default write timeout with the given value.
 func WithWriteTimeout(d time.Duration) ServerOption {
-	return func(s *Server, m *chi.Mux) error {
+	return func(s *Server, _ *chi.Mux) error {
 		if d < 0 {
 			return errors.New("write timeout must be positive")
 		}
@@ -125,9 +126,9 @@ func WithWriteTimeout(d time.Duration) ServerOption {
 	}
 }
 
-// WithIdleTimeout overrides the default idle timeout with the given value
+// WithIdleTimeout overrides the default idle timeout with the given value.
 func WithIdleTimeout(d time.Duration) ServerOption {
-	return func(s *Server, m *chi.Mux) error {
+	return func(s *Server, _ *chi.Mux) error {
 		if d < 0 {
 			return errors.New("idle timeout must be positive")
 		}
@@ -136,9 +137,9 @@ func WithIdleTimeout(d time.Duration) ServerOption {
 	}
 }
 
-// WithGracefulShutdownTimeout overrides the default graceful shutdown timeout with the given value
+// WithGracefulShutdownTimeout overrides the default graceful shutdown timeout with the given value.
 func WithGracefulShutdownTimeout(d time.Duration) ServerOption {
-	return func(s *Server, m *chi.Mux) error {
+	return func(s *Server, _ *chi.Mux) error {
 		if d < 0 {
 			return errors.New("graceful shutdown timeout must be positive")
 		}
@@ -147,10 +148,10 @@ func WithGracefulShutdownTimeout(d time.Duration) ServerOption {
 	}
 }
 
-// WithProfilingHandler enables go's pprof profiling
+// WithProfilingHandler enables go's pprof profiling.
 func WithProfilingHandler() ServerOption {
 	return func(_ *Server, m *chi.Mux) error {
-		// Based on https: //pkg.go.dev/net/http/pprof
+		// Based on https: //pkg.go.dev/net/http/pprof.
 		m.HandleFunc("/_/profile/*", pprof.Index)
 		m.HandleFunc("/_/profile/cmdline", pprof.Cmdline)
 		m.HandleFunc("/_/profile/profile", pprof.Profile)
@@ -166,7 +167,7 @@ func WithProfilingHandler() ServerOption {
 	}
 }
 
-// WithReadinessHandler sets the handler for readiness checks at `/_/ready`
+// WithReadinessHandler sets the handler for readiness checks at `/_/ready`.
 func WithReadinessHandler(h http.HandlerFunc) ServerOption {
 	return func(_ *Server, m *chi.Mux) error {
 		if h == nil {
@@ -177,7 +178,7 @@ func WithReadinessHandler(h http.HandlerFunc) ServerOption {
 	}
 }
 
-// WithRESTHandler sets the REST route handler
+// WithRESTHandler sets the REST route handler.
 func WithRESTHandler(rtr func(chi.Router)) ServerOption {
 	return func(_ *Server, m *chi.Mux) error {
 		if rtr == nil {
@@ -188,7 +189,7 @@ func WithRESTHandler(rtr func(chi.Router)) ServerOption {
 	}
 }
 
-// WithGQLHandler sets the GQL handler at `/graph` route
+// WithGQLHandler sets the GQL handler at `/graph` route.
 func WithGQLHandler(h http.Handler) ServerOption {
 	return func(_ *Server, m *chi.Mux) error {
 		if h == nil {
@@ -201,7 +202,7 @@ func WithGQLHandler(h http.Handler) ServerOption {
 
 func newRouter() *chi.Mux {
 	m := chi.NewRouter()
-	m.Get("/_/ping", func(w http.ResponseWriter, r *http.Request) {
+	m.Get("/_/ping", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		_, _ = fmt.Fprintln(w, "ok") // Intentionally ignoring the error as nothing to do once caught.

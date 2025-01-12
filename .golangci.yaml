@@ -1,0 +1,96 @@
+run:
+  modules-download-mode: "vendor"
+  allow-parallel-runners: true
+output:
+  show-stats: true
+linters:
+  disable-all: true
+  enable:
+    # Recommended:-
+    - gofumpt
+    - gosec
+    - govet
+    - revive
+    - staticcheck
+    - stylecheck
+    - unused
+    - gosimple
+    - errcheck
+    - ineffassign
+    # Personal:-
+    - bodyclose
+    - copyloopvar
+    - dupl
+    - errname
+    - exptostd
+    - exhaustive
+    - gci
+    - godot
+    - gocritic
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - misspell
+    - noctx
+    - perfsprint
+    - tenv
+    - testifylint
+    - unconvert
+    - usestdlibvars
+    - wrapcheck
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocritic
+        - gosec
+  # fix: true
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  gofumpt:
+    extra-rules: true
+  revive:
+    enable-all-rules: true
+    rules:
+      - name: indent-error-flow
+        disabled: true
+      - name: imports-blocklist
+        arguments:
+          - "lib/pq"
+          - "github.com/ericlagergren/decimal"
+      - name: line-length-limit
+        arguments: [160]
+        exclude: ["TEST"]
+      - name: flag-parameter
+        disabled: true
+      - name: bare-return
+        disabled: true
+      - name: add-constant
+        disabled: true
+      - name: function-length
+        exclude: ["TEST"]
+      - name: cognitive-complexity
+        exclude: ["TEST"]
+  exhaustive:
+    default-signifies-exhaustive: true
+  godot:
+    scope: all
+    exclude:
+      - "^// TODO:"
+      - "^# TODO:"
+  testifylint:
+    enable-all: true
+  usestdlibvars:
+    time-month: true
+    time-layout: true
+    crypto-hash: true
+    sql-isolation-level: true
+    tls-signature-scheme: true
+    constant-kind: true
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/kneadCODE/fursave/src/golib/*

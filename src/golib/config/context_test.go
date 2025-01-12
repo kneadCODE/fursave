@@ -8,40 +8,40 @@ import (
 )
 
 func TestAppFromContext(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When:
+	// When:.
 	cfg := AppFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.EqualValues(t, App{}, cfg)
 
-	// When:
+	// When:.
 	newCfg := App{Env: EnvDev}
 	ctx = context.WithValue(ctx, appCtxKey, newCfg)
 
-	// When:
+	// When:.
 	cfg = AppFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.EqualValues(t, newCfg, cfg)
 }
 
 func Test_SetAppInContext(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When:
+	// When:.
 	cfg := AppFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.EqualValues(t, App{}, cfg)
 
-	// When:
+	// When:.
 	newCfg := App{Env: EnvDev}
 	ctx = SetAppInContext(ctx, newCfg)
 
-	// When:
+	// When:.
 	require.EqualValues(t, newCfg, AppFromContext(ctx))
 }

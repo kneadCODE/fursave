@@ -12,10 +12,10 @@ import (
 )
 
 func TestCaptureDebugEvent(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When && Then:
+	// When && Then:.
 	CaptureDebugEvent(ctx, "some message")
 	CaptureDebugEvent(ctx, "some message: %s, %d, %f, %t", "s", 1, float32(32), true)
 	CaptureInfoEvent(ctx, "some message")
@@ -24,12 +24,12 @@ func TestCaptureDebugEvent(t *testing.T) {
 	CaptureWarnEvent(ctx, "some message: %s, %d, %f, %t", "s", 1, float32(32), true)
 	CaptureErrorEvent(ctx, errors.New("some err"))
 
-	// Given:
+	// Given:.
 	zapLogger, err := newZapStub(true, nil)
 	require.NoError(t, err)
 	ctx = melt.SetZapInContext(ctx, zapLogger)
 
-	// When && Then:
+	// When && Then:.
 	CaptureDebugEvent(ctx, "some message")
 	CaptureDebugEvent(ctx, "some message: %s, %d, %f, %t", "s", 1, float32(32), true)
 	CaptureInfoEvent(ctx, "some message")
@@ -38,7 +38,7 @@ func TestCaptureDebugEvent(t *testing.T) {
 	CaptureWarnEvent(ctx, "some message: %s, %d, %f, %t", "s", 1, float32(32), true)
 	CaptureErrorEvent(ctx, errors.New("some err"))
 
-	// Given:
+	// Given:.
 	res := resource.NewWithAttributes(semconv.SchemaURL, semconv.DeploymentEnvironment("development"))
 	lp, err := melt.NewOTELLoggerProvider(res)
 	require.NoError(t, err)
@@ -46,7 +46,7 @@ func TestCaptureDebugEvent(t *testing.T) {
 	require.NoError(t, err)
 	ctx = melt.SetZapInContext(ctx, zapLogger)
 
-	// When && Then:
+	// When && Then:.
 	CaptureDebugEvent(ctx, "some message")
 	CaptureDebugEvent(ctx, "some message: %s, %d, %f, %t", "s", 1, float32(32), true)
 	CaptureInfoEvent(ctx, "some message")

@@ -13,10 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Init initializes the telemetry components and returns:-
-// - context with telemetry components stored within
-// - shutdown func to flush any pending telemetry items
-// - err if there was an error during initialization
+// - err if there was an error during initialization.
 func Init(ctx context.Context) (newCtx context.Context, shutdown func(), err error) {
 	basicLogger := log.New(os.Stdout, "", log.LstdFlags)
 	newCtx = ctx
@@ -60,7 +57,7 @@ func shutdownFunc(
 		go func() {
 			defer wg.Done()
 			basicLogger.Println("Shutting down zap...")
-			_ = zapLogger.Sync() // Intentionally ignoring err because we zap has a bug where it always returns err here
+			_ = zapLogger.Sync() // Intentionally ignoring err because we zap has a bug where it always returns err here.
 			basicLogger.Println("Zap shutdown complete. Now shuting down OTEL Logger provider...")
 			if err := otelLoggerP.Shutdown(cancelCtx); err != nil {
 				basicLogger.Printf("OTEL Logger provider shutdown failed: %s", err.Error())

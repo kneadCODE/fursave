@@ -1,6 +1,8 @@
 package melt
 
 import (
+	"fmt"
+
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
 	sdklog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -9,7 +11,7 @@ import (
 func NewOTELLoggerProvider(res *resource.Resource) (*sdklog.LoggerProvider, error) {
 	logExporter, err := stdoutlog.New()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("err when creating stdoutlog exporter: %w", err)
 	}
 
 	loggerProvider := sdklog.NewLoggerProvider(

@@ -16,24 +16,26 @@ import (
 
 func main() {
 	log.Println("Welcome to Fursave")
-	ctx := context.Background()
 
 	ctx, err := config.Init()
 	if err != nil {
-		log.Fatalf("Failed to initialize App: %v", err)
+		log.Panicf("Failed to initialize App: %v", err)
 	}
 
 	ctx, telShutdownF, err := telemetry.Init(ctx)
+	if err != nil {
+		log.Panic(err)
+	}
 	defer telShutdownF()
 
 	s, err := initServer(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 
 	ctx, cancel := signal.NotifyContext(ctx, syscall.SIGTERM, os.Interrupt, os.Kill)
 	defer cancel()
-	s.Start(ctx)
+	_ = s.Start(ctx)
 }
 
 func initServer(ctx context.Context) (*httpserver.Server, error) {
@@ -41,11 +43,11 @@ func initServer(ctx context.Context) (*httpserver.Server, error) {
 		ctx,
 		httpserver.WithPort(4000),
 		httpserver.WithProfilingHandler(),
-		httpserver.WithReadinessHandler(func(w http.ResponseWriter, r *http.Request) {
+		httpserver.WithReadinessHandler(func(http.ResponseWriter, *http.Request) {
 			log.Println("readiness called")
 		}),
 		httpserver.WithRESTHandler(func(rtr chi.Router) {
-			rtr.Get("/abc", func(w http.ResponseWriter, r *http.Request) {
+			rtr.Get("/abc", func(http.ResponseWriter, *http.Request) {
 				log.Println("abc called")
 			})
 		}),

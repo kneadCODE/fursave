@@ -13,7 +13,7 @@ func NewZap(debugMode bool, loggerProvider *sdklog.LoggerProvider) (*zap.Sugared
 	if debugMode {
 		z, err := zap.Config{
 			Level: zap.NewAtomicLevelAt(zapcore.DebugLevel),
-			// Development: true,
+			// Development: true,.
 			Encoding: "console",
 			EncoderConfig: zapcore.EncoderConfig{
 				TimeKey:        "T",

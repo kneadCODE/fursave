@@ -3,7 +3,6 @@ package cfg
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -62,7 +61,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				"OTEL_DEPLOYMENT_ENVIRONMENT": "development",
 				"OTEL_CONTAINER_NAME":         "container",
 				"OTEL_CONTAINER_IMAGE_NAME":   "gcr.io/opentelemetry/operator",
-				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now
+				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now.
 				"OTEL_CONTAINER_RUNTIME": "docker",
 			},
 			expEnv: "development",
@@ -75,7 +74,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				"OTEL_DEPLOYMENT_ENVIRONMENT": "development",
 				"OTEL_CONTAINER_NAME":         "container",
 				"OTEL_CONTAINER_IMAGE_NAME":   "gcr.io/opentelemetry/operator",
-				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now
+				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now.
 				"OTEL_CONTAINER_RUNTIME":   "docker",
 				"OTEL_K8S_CLUSTER_NAME":    "cluster",
 				"OTEL_K8S_NODE_NAME":       "node",
@@ -98,7 +97,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				"OTEL_DEPLOYMENT_ENVIRONMENT": "development",
 				"OTEL_CONTAINER_NAME":         "container",
 				"OTEL_CONTAINER_IMAGE_NAME":   "gcr.io/opentelemetry/operator",
-				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now
+				// "OTEL_CONTAINER_IMAGE_TAGS":   "tags", // TODO: Need to modify test case verification as the expected output is `[tags]` and I am too lazy to do it properly now.
 				"OTEL_CONTAINER_RUNTIME":   "docker",
 				"OTEL_K8S_CLUSTER_NAME":    "cluster",
 				"OTEL_K8S_NODE_NAME":       "node",
@@ -112,7 +111,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				"OTEL_K8S_CRONJOB_NAME":    "cron",
 				"OTEL_CLOUD_PROVIDER":      "heaven",
 				"OTEL_CLOUD_REGION":        "mountain",
-				// "OTEL_CLOUD_AVAILABILITY_ZONE": "downtown", // TODO: Need to modify test case verification as the key name is `cloud.availability_zone` instead of `cloud.availability.zone` and I am too lazy to do it properly now
+				// "OTEL_CLOUD_AVAILABILITY_ZONE": "downtown", // TODO: Need to modify test case verification as the key name is `cloud.availability_zone` instead of `cloud.availability.zone` and I am too lazy to do it properly now.
 				"OTEL_CLOUD_PLATFORM": "heaven-platform",
 			},
 			expEnv: "development",
@@ -121,12 +120,12 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			// Given:
+			// Given:.
 			ctx := context.Background()
 			oldEnvVars := map[string]string{}
 			defer func() {
 				for k, v := range oldEnvVars {
-					require.NoError(t, os.Setenv(k, v))
+					t.Setenv(k, v)
 				}
 				withTelemetrySDKStub = resource.WithTelemetrySDK
 				withOSStub = resource.WithOS
@@ -136,7 +135,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 			}()
 			for k, v := range tc.givenEnvVars {
 				oldEnvVars[k] = os.Getenv(k)
-				require.NoError(t, os.Setenv(k, v))
+				t.Setenv(k, v)
 			}
 			var telStubCalled bool
 			withTelemetrySDKStub = func() resource.Option {
@@ -164,10 +163,10 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				return resource.WithProcess()
 			}
 
-			// When:
+			// When:.
 			res, env, err := NewOTELResourceFromEnv(ctx)
 
-			// Then:
+			// Then:.
 			require.Equal(t, tc.expErr, err)
 			require.Equal(t, tc.expEnv, env)
 			if tc.expErr != nil {
@@ -199,6 +198,6 @@ func convertEnvVarToOTELKeyStr(key string) string {
 
 func cmpResAttrVal(t *testing.T, res *resource.Resource, key attribute.Key, expVal string) {
 	v, ok := res.Set().Value(key)
-	require.True(t, ok, fmt.Sprintf("missing: %s", string(key)))
-	require.Equal(t, expVal, v.Emit(), fmt.Sprintf("for: %s", string(key)))
+	require.True(t, ok, "missing: %s", string(key))
+	require.Equal(t, expVal, v.Emit(), "for: %s", string(key))
 }

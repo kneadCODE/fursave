@@ -6,5 +6,5 @@ type ContextKey struct {
 	Name string
 }
 
-// String provides the string representation of ContextKey
+// String provides the string representation of ContextKey.
 func (k ContextKey) String() string { return "golib:context_key:" + k.Name }

@@ -12,7 +12,6 @@ import (
 
 func TestInit(t *testing.T) {
 	type testCase struct {
-		givenSentryEnabled                  bool
 		mockRes                             *resource.Resource
 		mockEnvStr                          string
 		mockResErr                          error
@@ -43,25 +42,25 @@ func TestInit(t *testing.T) {
 
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
-			// Given:
+			// Given:.
 			defer resetStubs()
 			var newOTELResourceFromEnvStubCalled bool
-			newOTELResourceFromEnvStub = func(ctx context.Context) (*resource.Resource, string, error) {
+			newOTELResourceFromEnvStub = func(context.Context) (*resource.Resource, string, error) {
 				newOTELResourceFromEnvStubCalled = true
 				return tc.mockRes, tc.mockEnvStr, tc.mockResErr
 			}
 
-			// When:
+			// When:.
 			ctx, err := Init()
 
-			// Then:
+			// Then:.
 			require.Equal(t, tc.expNewOTELResourceFromEnvStubCalled, newOTELResourceFromEnvStubCalled)
 
 			if tc.expErr != nil {
 				require.Equal(t, tc.expErr, err)
 				require.EqualValues(t, tc.expApp, AppFromContext(ctx))
 			} else {
-				require.Nil(t, err)
+				require.NoError(t, err)
 
 				app := AppFromContext(ctx)
 				require.EqualValues(t, tc.expApp, app)

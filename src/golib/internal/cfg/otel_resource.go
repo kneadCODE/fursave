@@ -70,14 +70,14 @@ func loadServiceResourceFromEnv() ([]attribute.KeyValue, error) {
 	}
 
 	if v := getOTELEnvVar(semconv.ServiceNamespaceKey); v == "" {
-		// OTEL considers this optional, but we will consider it mandatory to avoid mistakes
+		// OTEL considers this optional, but we will consider it mandatory to avoid mistakes.
 		return nil, fmtMissingEnvVarError(semconv.ServiceNamespaceKey)
 	} else {
 		attrs = append(attrs, semconv.ServiceNamespace(v))
 	}
 
 	if v := getOTELEnvVar(semconv.ServiceVersionKey); v == "" {
-		// OTEL considers this optional, but we will consider it mandatory to avoid mistakes
+		// OTEL considers this optional, but we will consider it mandatory to avoid mistakes.
 		return nil, fmtMissingEnvVarError(semconv.ServiceVersionKey)
 	} else {
 		attrs = append(attrs, semconv.ServiceVersion(v))
@@ -109,7 +109,7 @@ func loadK8sResourceFromEnv() []attribute.KeyValue {
 		semconv.K8SCronJobName(getOTELEnvVar(semconv.K8SCronJobNameKey)),
 	}
 
-	intV, _ := strconv.Atoi(getOTELEnvVar(semconv.K8SContainerRestartCountKey)) // Intentionally suppressing the err since nothing to do
+	intV, _ := strconv.Atoi(getOTELEnvVar(semconv.K8SContainerRestartCountKey)) // Intentionally suppressing the err since nothing to do.
 	attrs = append(attrs, semconv.K8SContainerRestartCount(intV))
 
 	return attrs
@@ -129,11 +129,9 @@ func getOTELEnvVar(key attribute.Key) string {
 }
 
 func getOTELEnvVarKey(key attribute.Key) string {
-	// Convert key into OTEL_<envvar> format and replace dots with underscore
-	return fmt.Sprintf("OTEL_%s",
-		strings.ToUpper(
-			strings.Replace(string(key), ".", "_", -1),
-		),
+	// Convert key into OTEL_<envvar> format and replace dots with underscore.
+	return "OTEL_" + strings.ToUpper(
+		strings.ReplaceAll(string(key), ".", "_"),
 	)
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 func TestWithAttrs(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 	res := resource.NewWithAttributes(semconv.SchemaURL, semconv.DeploymentEnvironment("development"))
 	lp, err := melt.NewOTELLoggerProvider(res)
@@ -20,7 +20,7 @@ func TestWithAttrs(t *testing.T) {
 	require.NoError(t, err)
 	ctx = melt.SetZapInContext(ctx, zapLogger)
 
-	// When:
+	// When:.
 	ctx = WithAttrs(ctx,
 		"string", "str",
 		"int", 1,
@@ -28,7 +28,7 @@ func TestWithAttrs(t *testing.T) {
 		"bool", true,
 	)
 
-	// Then:
+	// Then:.
 	CaptureInfoEvent(ctx, "test with attrs: %s", "hello world")
 	require.NoError(t, lp.ForceFlush(ctx))
 }
