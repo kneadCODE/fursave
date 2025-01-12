@@ -15,40 +15,40 @@ func TestContextKey_String(t *testing.T) {
 }
 
 func TestZapFromContext(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When:
+	// When:.
 	l := ZapFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.Nil(t, l)
 
-	// When:
+	// When:.
 	newL := zap.NewExample().Sugar()
 	ctx = context.WithValue(ctx, zapCtxKey, newL)
 
-	// When:
+	// When:.
 	l = ZapFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.EqualValues(t, newL, l)
 }
 
 func TestSetZapInContext(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When:
+	// When:.
 	l := ZapFromContext(ctx)
 
-	// Then:
+	// Then:.
 	require.Nil(t, l)
 
-	// When:
+	// When:.
 	newL := zap.NewExample().Sugar()
 	ctx = SetZapInContext(ctx, newL)
 
-	// When:
+	// When:.
 	require.EqualValues(t, newL, ZapFromContext(ctx))
 }

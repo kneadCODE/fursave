@@ -10,27 +10,27 @@ import (
 )
 
 func Test_NewZap(t *testing.T) {
-	// Given:
+	// Given:.
 	res := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.DeploymentEnvironment("development"),
 	)
 
-	// When:
+	// When:.
 	l, err := NewZap(true, nil)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NotNil(t, l)
 	l.Info("testing")
 
-	// When:
+	// When:.
 	lp, err := NewOTELLoggerProvider(res)
 	require.NoError(t, err)
 
 	l, err = NewZap(false, lp)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NotNil(t, l)
 	l.Info("testing")

@@ -15,28 +15,28 @@ import (
 )
 
 func TestNewServer(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
-	// When:
+	// When:.
 	s, err := NewServer(ctx)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NotNil(t, s)
 
-	// When:
+	// When:.
 	s, err = NewServer(ctx, func(_ *Server, _ *chi.Mux) error {
 		return errors.New("custom err")
 	})
 
-	// Then:
-	require.Error(t, errors.New("custom err"))
+	// Then:.
+	require.Error(t, err)
 	require.Nil(t, s)
 }
 
 func TestServer_Start(t *testing.T) {
-	// Given:
+	// Given:.
 	ctx := context.Background()
 
 	srv, err := NewServer(ctx)
@@ -48,13 +48,13 @@ func TestServer_Start(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// When:
+	// When:.
 	go func() {
 		defer wg.Done()
 		err = srv.Start(ctx)
 	}()
 
-	// Then:
+	// Then:.
 	time.Sleep(2 * time.Second)
 	cancel()
 	wg.Wait()
@@ -62,99 +62,99 @@ func TestServer_Start(t *testing.T) {
 }
 
 func TestWithPort(t *testing.T) {
-	// Given:
+	// Given:.
 	s := &Server{srv: &http.Server{}}
 
-	// When:
+	// When:.
 	err := WithPort(-1)(s, nil)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("invalid port number"), err)
 
-	// When:
+	// When:.
 	err = WithPort(3)(s, nil)
 	require.NoError(t, err)
 	require.Equal(t, ":3", s.srv.Addr)
 }
 
 func TestWithReadTimeout(t *testing.T) {
-	// Given:
+	// Given:.
 	s := &Server{srv: &http.Server{}}
 
-	// When:
+	// When:.
 	err := WithReadTimeout(-1)(s, nil)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("read timeout must be positive"), err)
 
-	// When:
+	// When:.
 	err = WithReadTimeout(3)(s, nil)
 	require.NoError(t, err)
 	require.Equal(t, time.Duration(3), s.srv.ReadTimeout)
 }
 
 func TestWithWriteTimeout(t *testing.T) {
-	// Given:
+	// Given:.
 	s := &Server{srv: &http.Server{}}
 
-	// When:
+	// When:.
 	err := WithWriteTimeout(-1)(s, nil)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("write timeout must be positive"), err)
 
-	// When:
+	// When:.
 	err = WithWriteTimeout(3)(s, nil)
 	require.NoError(t, err)
 	require.Equal(t, time.Duration(3), s.srv.WriteTimeout)
 }
 
 func TestWithIdleTimeout(t *testing.T) {
-	// Given:
+	// Given:.
 	s := &Server{srv: &http.Server{}}
 
-	// When:
+	// When:.
 	err := WithIdleTimeout(-1)(s, nil)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("idle timeout must be positive"), err)
 
-	// When:
+	// When:.
 	err = WithIdleTimeout(3)(s, nil)
 	require.NoError(t, err)
 	require.Equal(t, time.Duration(3), s.srv.IdleTimeout)
 }
 
 func TestWithGracefulShutdownTimeout(t *testing.T) {
-	// Given:
+	// Given:.
 	s := &Server{srv: &http.Server{}}
 
-	// When:
+	// When:.
 	err := WithGracefulShutdownTimeout(-1)(s, nil)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("graceful shutdown timeout must be positive"), err)
 
-	// When:
+	// When:.
 	err = WithGracefulShutdownTimeout(3)(s, nil)
 	require.NoError(t, err)
 	require.Equal(t, time.Duration(3), s.gracefulShutdownTimeout)
 }
 
 func TestWithProfilingHandler(t *testing.T) {
-	// Given:
+	// Given:.
 	m := chi.NewRouter()
 
-	// When:
+	// When:.
 	err := WithProfilingHandler()(nil, m)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 
 	var routesFound []string
 	require.NoError(t, chi.Walk(
 		m,
-		func(method string, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
+		func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
 			routesFound = append(routesFound, method+" "+route)
 			return nil
 		},
@@ -178,23 +178,23 @@ func TestWithProfilingHandler(t *testing.T) {
 }
 
 func TestWithReadinessHandler(t *testing.T) {
-	// Given:
+	// Given:.
 	m := chi.NewRouter()
 
-	// When:
+	// When:.
 	err := WithReadinessHandler(nil)(nil, m)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("readiness handler cannot be nil"), err)
 
-	// When:
+	// When:.
 	err = WithReadinessHandler(func(http.ResponseWriter, *http.Request) {})(nil, m)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NoError(t, chi.Walk(
 		m,
-		func(method string, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
+		func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
 			require.Equal(t, "GET", method)
 			require.Equal(t, "/_/ready", route)
 			return nil
@@ -203,25 +203,25 @@ func TestWithReadinessHandler(t *testing.T) {
 }
 
 func TestWithRESTHandler(t *testing.T) {
-	// Given:
+	// Given:.
 	m := chi.NewRouter()
 
-	// When:
+	// When:.
 	err := WithRESTHandler(nil)(nil, m)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("rest handler cannot be nil"), err)
 
-	// When:
+	// When:.
 	err = WithRESTHandler(func(rtr chi.Router) {
 		rtr.Get("/get", nil)
 	})(nil, m)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NoError(t, chi.Walk(
 		m,
-		func(method string, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
+		func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
 			require.Equal(t, "GET", method)
 			require.Equal(t, "/get", route)
 			return nil
@@ -230,24 +230,24 @@ func TestWithRESTHandler(t *testing.T) {
 }
 
 func TestWithGQLHandler(t *testing.T) {
-	// Given:
+	// Given:.
 	m := chi.NewRouter()
 
-	// When:
+	// When:.
 	err := WithGQLHandler(nil)(nil, m)
 
-	// Then:
+	// Then:.
 	require.Equal(t, errors.New("gql handler cannot be nil"), err)
 
-	// When:
+	// When:.
 	err = WithGQLHandler(http.NewServeMux())(nil, m)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	var routesFound []string
 	require.NoError(t, chi.Walk(
 		m,
-		func(method string, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
+		func(method, route string, _ http.Handler, _ ...func(http.Handler) http.Handler) error {
 			routesFound = append(routesFound, method+" "+route)
 			return nil
 		},
@@ -271,12 +271,12 @@ func TestWithGQLHandler(t *testing.T) {
 }
 
 func Test_newRouter(t *testing.T) {
-	// Given:
-	r := httptest.NewRequest("GET", "/_/ping", nil)
+	// Given:.
+	r := httptest.NewRequest(http.MethodGet, "/_/ping", nil)
 	w := httptest.NewRecorder()
 	m := newRouter()
 
-	// When:
+	// When:.
 	m.ServeHTTP(w, r)
 
 	require.Equal(t, http.StatusOK, w.Result().StatusCode)

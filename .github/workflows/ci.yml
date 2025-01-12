@@ -16,7 +16,7 @@ jobs:
       - name: Print inputs context
         run: echo "${{ toJSON(inputs) }}"
 
-  ####### Run tests & build Start ######
+  ####### Run linters, tests & build: START ######
   test-and-build:
     name: Test & Build (${{ matrix.project }})
     needs: [ init ]
@@ -45,6 +45,12 @@ jobs:
         run: make ${{ matrix.project }}-setup
       - name: Run tests
         run: make ${{ matrix.project }}-test
+      - name: Run golangci-lint
+        if: ${{ matrix.language == 'go' }}
+        uses: golangci/golangci-lint-action@971e284b6050e8a5849b72094c50ab08da042db8 #v6.1.1
+        with:
+          version: v1.63
+          working-directory: src/${{ matrix.project }}/
       - name: Build binaries
         if: ${{ matrix.type == 'application' && matrix.language == 'go' }}
         run: make ${{ matrix.project }}-build-binaries
@@ -69,7 +75,7 @@ jobs:
           registry-password: ${{ secrets.GITHUB_TOKEN }}
           image-prefix: ${{ github.repository }}
           push: ${{ github.event_name != 'pull_request' }}
-  ####### Run tests & build End ######
+  ####### Run linters, tests & build: END ######
 
   ####### SAST Start ######
   sonar-scan-root:

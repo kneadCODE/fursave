@@ -11,17 +11,16 @@ import (
 )
 
 func TestNewOTELLoggerProvider(t *testing.T) {
-	// Given:
-	// Given:
+	// Given:.
 	res := resource.NewWithAttributes(
 		semconv.SchemaURL,
 		semconv.DeploymentEnvironment("development"),
 	)
 
-	// When:
+	// When:.
 	lp, err := NewOTELLoggerProvider(res)
 
-	// Then:
+	// Then:.
 	require.NoError(t, err)
 	require.NotNil(t, lp)
 	global.SetLoggerProvider(lp)
