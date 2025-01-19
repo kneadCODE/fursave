@@ -5,6 +5,8 @@
 # ---------------- Global Variables ----------------------
 COMPOSE_BIN := docker compose
 PROJECT_NAME := fursave
+TERRAFORM_BIN := terraform
+K3D_BIN := k3d
 
 # ---------------- Colors & Formatting -------------------
 GREEN  := \033[0;32m
@@ -33,6 +35,12 @@ help:
 	@echo -e "  ${BLUE}make ledgersvc-pg${RESET}            - Start PostgreSQL service"
 	@echo -e "  ${BLUE}make ledgersvc-pg-migrate${RESET}    - Run database migrations"
 	@echo -e "  ${BLUE}make ledgersvc-pg-migrate-down${RESET} - Rollback database migrations"
+	@echo ""
+	@echo -e "${YELLOW}Kubernetes Targets:${RESET}"
+	@echo -e "  ${BLUE}make setup-k8s-cluster${RESET}  - Create local k3d cluster"
+	@echo -e "  ${BLUE}make setup-k8s-ns${RESET} - Setup k8s namespaces"
+	@echo -e "  ${BLUE}make teardown-k8s-cluster${RESET} - Delete local k3d cluster"
+	@echo -e "  ${BLUE}make redo-k8s${RESET} - Delete and re-create the k3d cluster and the namespaces"
 
 # ========================================================
 # Service-Specific Compose Configurations
@@ -116,10 +124,31 @@ go-build-binaries:
 	${COMPOSE_CMD} run --rm go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
 
 # ========================================================
+# Kubernetes Targets
+# ========================================================
+.PHONY: setup-k8s-cluster setup-k8s-ns setup-k8s-ns
+
+setup-k8s-cluster:
+	${K3D_BIN} cluster create ${PROJECT_NAME}
+
+setup-k8s-ns:
+	cd build/k8s/cluster-operations/namespaces/dev && \
+	TF_VAR_k8s_config_context=k3d-${PROJECT_NAME} ${TERRAFORM_BIN} init && \
+	TF_VAR_k8s_config_context=k3d-${PROJECT_NAME} ${TERRAFORM_BIN} validate && \
+	TF_VAR_k8s_config_context=k3d-${PROJECT_NAME} ${TERRAFORM_BIN} apply -auto-approve
+
+redo-k8s: teardown-k8s-cluster setup-k8s-cluster setup-k8s-ns
+
+# ========================================================
 # Cleanup Targets
 # ========================================================
+.PHONY: teardown-k8s-cluster
+
 teardown:
 	${COMPOSE_CMD} down --rmi local
+
+teardown-k8s-cluster:
+	${K3D_BIN} cluster delete ${PROJECT_NAME}
 
 # ========================================================
 # End of Makefile
