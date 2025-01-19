@@ -18,29 +18,29 @@ RESET  := \033[0m
 # ========================================================
 .PHONY: help
 help:
-	@echo -e "${GREEN}Fursave Project Makefile${RESET}"
-	@echo -e "${YELLOW}Top-Level Targets:${RESET}"
-	@echo -e "  ${BLUE}make help${RESET}         - Show this help message"
-	@echo -e "  ${BLUE}make teardown-all${RESET} - Teardown all services"
+	@echo "${GREEN}Fursave Project Makefile${RESET}"
+	@echo "${YELLOW}Top-Level Targets:${RESET}"
+	@echo "  ${BLUE}make help${RESET}         - Show this help message"
+	@echo "  ${BLUE}make teardown-compose-all${RESET} - Teardown all compose services"
+	@echo "  ${BLUE}make teardown-k8s-cluster${RESET} - Teardown local k3d cluster"
 	@echo ""
-	@echo -e "${YELLOW}Go Library Service Targets:${RESET}"
-	@echo -e "  ${BLUE}make golib-setup${RESET}       - Setup Go library service"
-	@echo -e "  ${BLUE}make golib-teardown${RESET}    - Teardown Go library service"
-	@echo -e "  ${BLUE}make golib-test${RESET}        - Run tests for Go library service"
+	@echo "${YELLOW}Go Library Service Targets:${RESET}"
+	@echo "  ${BLUE}make golib-setup${RESET}       - Setup Go library service"
+	@echo "  ${BLUE}make golib-teardown${RESET}    - Teardown Go library service"
+	@echo "  ${BLUE}make golib-test${RESET}        - Run tests for Go library service"
 	@echo ""
-	@echo -e "${YELLOW}Ledger Service Targets:${RESET}"
-	@echo -e "  ${BLUE}make ledgersvc-setup${RESET}         - Setup Ledger service and dependencies"
-	@echo -e "  ${BLUE}make ledgersvc-teardown${RESET}      - Teardown Ledger service"
-	@echo -e "  ${BLUE}make ledgersvc-test${RESET}          - Run tests for Ledger service"
-	@echo -e "  ${BLUE}make ledgersvc-pg${RESET}            - Start PostgreSQL service"
-	@echo -e "  ${BLUE}make ledgersvc-pg-migrate${RESET}    - Run database migrations"
-	@echo -e "  ${BLUE}make ledgersvc-pg-migrate-down${RESET} - Rollback database migrations"
+	@echo "${YELLOW}Ledger Service Targets:${RESET}"
+	@echo "  ${BLUE}make ledgersvc-setup${RESET}         - Setup Ledger service and dependencies"
+	@echo "  ${BLUE}make ledgersvc-teardown${RESET}      - Teardown Ledger service"
+	@echo "  ${BLUE}make ledgersvc-test${RESET}          - Run tests for Ledger service"
+	@echo "  ${BLUE}make ledgersvc-pg${RESET}            - Start PostgreSQL service"
+	@echo "  ${BLUE}make ledgersvc-pg-migrate${RESET}    - Run database migrations"
+	@echo "  ${BLUE}make ledgersvc-pg-migrate-down${RESET} - Rollback database migrations"
 	@echo ""
-	@echo -e "${YELLOW}Kubernetes Targets:${RESET}"
-	@echo -e "  ${BLUE}make setup-k8s-cluster${RESET}  - Create local k3d cluster"
-	@echo -e "  ${BLUE}make setup-k8s-ns${RESET} - Setup k8s namespaces"
-	@echo -e "  ${BLUE}make teardown-k8s-cluster${RESET} - Delete local k3d cluster"
-	@echo -e "  ${BLUE}make redo-k8s${RESET} - Delete and re-create the k3d cluster and the namespaces"
+	@echo "${YELLOW}Kubernetes Targets:${RESET}"
+	@echo "  ${BLUE}make setup-k8s-cluster${RESET}  - Create local k3d cluster"
+	@echo "  ${BLUE}make setup-k8s-ns${RESET} - Setup k8s namespaces"
+	@echo "  ${BLUE}make redo-k8s${RESET} - Delete and re-create the k3d cluster and the namespaces"
 
 # ========================================================
 # Service-Specific Compose Configurations
@@ -52,13 +52,10 @@ COMPOSE_GOLIB := ${COMPOSE_BIN} -f src/golib/build/docker-compose.yaml -p ${PROJ
 COMPOSE_LEDGERSVC := ${COMPOSE_BIN} -f src/ledgersvc/build/docker-compose.yaml -p ${PROJECT_NAME}-ledgersvc
 
 # ========================================================
-# Top-Level Management Targets
-# ========================================================
-teardown-all: golib-teardown ledgersvc-teardown
-
-# ========================================================
 # Go Library Service Targets
 # ========================================================
+.PHONY: golib-teardown golib-clean-vendor golib-setup golib-test
+
 golib-teardown: COMPOSE_CMD=${COMPOSE_GOLIB}
 golib-teardown: teardown
 
@@ -74,7 +71,8 @@ golib-test: go-test
 # ========================================================
 # Ledger Service Targets
 # ========================================================
-# PostgreSQL-specific targets
+.PHONY: ledgersvc-pg ledgersvc-pg-migrate ledgersvc-pg-migrate-down ledgersvc-mg-migrate-redo ledgersvc-teardown ledgersvc-clean-vendor ledgersvc-setup ledgersvc-test ledgersvc-build-binaries ledgersvc-serverd
+
 ledgersvc-pg:
 	${COMPOSE_LEDGERSVC} up -d pg
 
@@ -86,7 +84,6 @@ ledgersvc-pg-migrate-down:
 
 ledgersvc-pg-migrate-redo: ledgersvc-pg-migrate-down ledgersvc-pg-migrate
 
-# Service-level targets
 ledgersvc-teardown: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
 ledgersvc-teardown: teardown
 
@@ -106,8 +103,10 @@ ledgersvc-serverd:
 	${COMPOSE_LEDGERSVC} run --rm --service-ports go sh -c 'go run cmd/serverd/*.go'
 
 # ========================================================
-# Reusable Go Commands
+# Reusable Commands
 # ========================================================
+.PHONY: go-vendor go-clean-vendor go-gen go-test go-build-binaries teardown-compose
+
 go-vendor:
 	${COMPOSE_CMD} run --rm go sh -c 'go mod vendor'
 
@@ -123,10 +122,13 @@ go-test:
 go-build-binaries:
 	${COMPOSE_CMD} run --rm go sh -c 'for CMD in `ls cmd`; do (go build -v -o build/binaries/$$CMD ./cmd/$$CMD) done'
 
+teardown-compose:
+	${COMPOSE_CMD} down --rmi local
+
 # ========================================================
 # Kubernetes Targets
 # ========================================================
-.PHONY: setup-k8s-cluster setup-k8s-ns setup-k8s-ns
+.PHONY: setup-k8s-cluster setup-k8s-ns redo-k8s
 
 setup-k8s-cluster:
 	${K3D_BIN} cluster create ${PROJECT_NAME}
@@ -142,10 +144,9 @@ redo-k8s: teardown-k8s-cluster setup-k8s-cluster setup-k8s-ns
 # ========================================================
 # Cleanup Targets
 # ========================================================
-.PHONY: teardown-k8s-cluster
+.PHONY: teardown-compose-all teardown-k8s-cluster
 
-teardown:
-	${COMPOSE_CMD} down --rmi local
+teardown-compose-all: golib-teardown ledgersvc-teardown
 
 teardown-k8s-cluster:
 	${K3D_BIN} cluster delete ${PROJECT_NAME}
