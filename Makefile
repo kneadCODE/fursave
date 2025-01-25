@@ -41,6 +41,10 @@ help:
 	@echo "  ${BLUE}make setup-k8s-cluster${RESET}  - Create local k3d cluster"
 	@echo "  ${BLUE}make setup-k8s-ns${RESET} - Setup k8s namespaces"
 	@echo "  ${BLUE}make redo-k8s${RESET} - Delete and re-create the k3d cluster and the namespaces"
+	@echo ""
+	@echo "${YELLOW}Tilt Targets:${RESET}"
+	@echo "  ${BLUE}make tilt-up{RESET}  - Start Tilt"
+	@echo "  ${BLUE}make tilt-down${RESET} - Stop Tilt"
 
 # ========================================================
 # Service-Specific Compose Configurations
@@ -57,7 +61,7 @@ COMPOSE_LEDGERSVC := ${COMPOSE_BIN} -f src/ledgersvc/build/docker-compose.yaml -
 .PHONY: golib-teardown golib-clean-vendor golib-setup golib-test
 
 golib-teardown: COMPOSE_CMD=${COMPOSE_GOLIB}
-golib-teardown: teardown
+golib-teardown: teardown-compose
 
 golib-clean-vendor: COMPOSE_CMD=${COMPOSE_GOLIB}
 golib-clean-vendor: go-clean-vendor
@@ -85,7 +89,7 @@ ledgersvc-pg-migrate-down:
 ledgersvc-pg-migrate-redo: ledgersvc-pg-migrate-down ledgersvc-pg-migrate
 
 ledgersvc-teardown: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
-ledgersvc-teardown: teardown
+ledgersvc-teardown: teardown-compose
 
 ledgersvc-clean-vendor: COMPOSE_CMD=${COMPOSE_LEDGERSVC}
 ledgersvc-clean-vendor: go-clean-vendor
@@ -131,7 +135,7 @@ teardown-compose:
 .PHONY: setup-k8s-cluster setup-k8s-ns redo-k8s
 
 setup-k8s-cluster:
-	${K3D_BIN} cluster create ${PROJECT_NAME}
+	K3D_FIX_DNS=0 ${K3D_BIN} cluster create ${PROJECT_NAME} --registry-create ${PROJECT_NAME}-registry
 
 setup-k8s-ns:
 	cd build/k8s/cluster-operations/namespaces/dev && \
@@ -140,6 +144,17 @@ setup-k8s-ns:
 	TF_VAR_k8s_config_context=k3d-${PROJECT_NAME} ${TERRAFORM_BIN} apply -auto-approve
 
 redo-k8s: teardown-k8s-cluster setup-k8s-cluster setup-k8s-ns
+
+# ========================================================
+# Tilt Targets
+# ========================================================
+.PHONY: tilt-up tilt-down
+
+tilt-up:
+	tilt up
+
+tilt-down:
+	tilt down
 
 # ========================================================
 # Cleanup Targets

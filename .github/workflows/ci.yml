@@ -51,9 +51,6 @@ jobs:
         with:
           version: v1.63
           working-directory: src/${{ matrix.project }}/
-      - name: Build binaries
-        if: ${{ matrix.type == 'application' && matrix.language == 'go' }}
-        run: make ${{ matrix.project }}-build-binaries
       - name: SonarQube scan
         uses: ./.github/actions/sonarqube-scan
         with:
@@ -137,4 +134,4 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/cd.yml
     with:
-      environment: STAGING
+      environment: staging

@@ -1,0 +1,8 @@
+build
+db-scripts
+.env
+.golangci.yaml
+*.out
+sonar-project.properties
+sqlboiler.yaml
+.vscode

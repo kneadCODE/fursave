@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: serverd
+spec:
+  revisionHistoryLimit: 1
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: serverd
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "20m"
+            limits: # TODO: There is something wrong with the go app that is taking too much CPU/mem. Need to look into it.
+              memory: "128Mi"
+              cpu: "100m"
