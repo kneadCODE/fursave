@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+	log.SetOutput(os.Stdout)
 	log.Println("Welcome to Fursave")
 
 	ctx, err := config.Init()
