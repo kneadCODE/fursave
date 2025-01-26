@@ -49,13 +49,11 @@ func initServer(ctx context.Context) (*httpserver.Server, error) {
 		ctx,
 		httpserver.WithPort(port),
 		httpserver.WithProfilingHandler(),
-		httpserver.WithReadinessHandler(func(http.ResponseWriter, *http.Request) {
-			log.Println("readiness called")
+		httpserver.WithReadinessHandler(func(_ http.ResponseWriter, r *http.Request) {
+			telemetry.CaptureInfoEvent(r.Context(), "readiness called")
 		}),
-		httpserver.WithRESTHandler(func(rtr chi.Router) {
-			rtr.Get("/abc", func(http.ResponseWriter, *http.Request) {
-				log.Println("abc called")
-			})
+		httpserver.WithRESTHandler(func(chi.Router) {
+			// Add routes here.
 		}),
 	)
 	if err != nil {
