@@ -3,7 +3,6 @@ package cfg
 import (
 	"context"
 	"errors"
-	"os"
 	"strings"
 	"testing"
 
@@ -122,11 +121,7 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Given:.
 			ctx := context.Background()
-			oldEnvVars := map[string]string{}
 			defer func() {
-				for k, v := range oldEnvVars {
-					t.Setenv(k, v)
-				}
 				withTelemetrySDKStub = resource.WithTelemetrySDK
 				withOSStub = resource.WithOS
 				withHostStub = resource.WithHost
@@ -134,7 +129,6 @@ func TestNewOTELResourceFromEnv(t *testing.T) {
 				withProcessStub = resource.WithProcess
 			}()
 			for k, v := range tc.givenEnvVars {
-				oldEnvVars[k] = os.Getenv(k)
 				t.Setenv(k, v)
 			}
 			var telStubCalled bool
